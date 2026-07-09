@@ -1,0 +1,68 @@
+{
+  "metadata": {
+    "id": "rustic_digital",
+    "display_name": "Rustic Digital",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "24px"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "24px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": false
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#252422",
+      "bottom_sheet_background": "#252422",
+      "calculator_screen_background": "#FFFCF2"
+    },
+    "typography": {
+      "title": "#FFFCF2",
+      "header_accent": "#EB5E28",
+      "body_primary": "#FFFCF2",
+      "body_secondary": "#CCC5B9",
+      "screen_primary": "#403D39",
+      "screen_secondary": "#CCC5B9"
+    },
+    "interactive_components": {
+      "done_button": {
+        "icon": "#403D39",
+        "background": "#FFFCF2"
+      },
+      "close_button": {
+        "icon": "#FFFCF2",
+        "background": "#EB5E28"
+      },
+      "back_button": {
+        "icon": "#FFFCF2",
+        "background": "#EB5E28"
+      },
+      "confirm_button": {
+        "icon": "#EB5E28",
+        "background": "#403D39"
+      },
+      "select_button": {
+        "icon": "#403D39",
+        "background": "#CCC5B9"
+      },
+      "operator_button": {
+        "text": "#FFFCF2",
+        "background": "#EB5E28"
+      },
+      "numbers_button": {
+        "text": "#FFFCF2",
+        "background": "#403D39"
+      },
+      "delete_button": {
+        "text": "#FFFCF2",
+        "background": "#CCC5B9"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#EB5E28",
+      "item_separator": "#403D39"
+    }
+  }
+}

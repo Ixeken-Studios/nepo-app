@@ -1,0 +1,8 @@
+Nepo is a modular calculator and converter built under Clean Architecture principles with Jetpack Compose.
+
+Features:
+- Dynamic theme switching from JSON config files.
+- Live font styling using Google Fonts.
+- Safe execution in portrait or landscape orientations.
+- Persistent calculations history.
+- A fully isolated computing engine with 100% offline privacy.

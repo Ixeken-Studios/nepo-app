@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calc_label_home">Calculator</string>
+    <string name="calc_state_empty">0</string>
+    <string name="calc_error_division_by_zero">Error: Division by zero</string>
+    <string name="calc_error_invalid_expression">Invalid expression</string>
+
+    <string name="history_title_no_history">No history</string>
+    <string name="history_btn_edit">Edit</string>
+    <string name="history_btn_done">Done</string>
+    <string name="history_btn_clear_all">Clear all</string>
+    <string name="history_btn_delete_quantity">Delete (%1$d)</string>
+    <string name="history_group_latest">Latest</string>
+    <string name="history_group_past_30_days">Past 30 days</string>
+    <string name="history_group_older">Older</string>
+
+    <string name="settings_nav_root">Settings</string>
+    <string name="settings_nav_appearance">Customization</string>
+    <string name="settings_nav_themes">Themes</string>
+    <string name="settings_nav_fonts">Fonts</string>
+    <string name="settings_nav_formatting">Formatting</string>
+    
+    <string name="settings_section_preferences">Preferences</string>
+    <string name="settings_section_customization">Customization</string>
+    <string name="settings_section_appearance">Appearance</string>
+    <string name="settings_section_number_formatting">Number formatting</string>
+    
+    <string name="settings_option_appearance">Customization</string>
+    <string name="settings_option_formatting">Formatting</string>
+    <string name="settings_option_themes">Themes</string>
+    <string name="settings_option_fonts">Fonts</string>
+    
+    <string name="settings_label_select_theme">Select a theme</string>
+    <string name="settings_label_select_font">Select a font</string>
+    <string name="settings_label_thousands_separator">Thousands separator</string>
+
+    <!-- About Screen & Updates -->
+    <string name="settings_section_about">About</string>
+    <string name="app_name_about">Nepo</string>
+    <string name="app_version_about">v1.0.0</string>
+    <string name="settings_section_info_updates">Information &amp; Updates</string>
+    <string name="settings_option_view_changelog">View changelog</string>
+    <string name="settings_option_check_updates">Check for updates</string>
+    <string name="settings_option_check_update_on_start">Check update on start</string>
+    <string name="settings_desc_check_update_on_start">Automatically check for update when the app starts</string>
+    <string name="settings_option_view_repository">View repository</string>
+    
+    <string name="settings_dialog_update_check">Update Check</string>
+    <string name="settings_dialog_checking_updates">Checking for updates…</string>
+    <string name="settings_dialog_up_to_date">Nepo is up to date (%1$s)</string>
+    <string name="settings_dialog_update_available">New version %1$s is available!</string>
+    <string name="settings_dialog_update_error">Could not connect to GitHub. Repository may be private or network is offline.</string>
+    <string name="settings_dialog_btn_ok">OK</string>
+    <string name="settings_dialog_btn_download">Download</string>
+    <string name="settings_dialog_btn_retry">Retry</string>
+    
+    <string name="settings_sheet_changelog">Changelog</string>
+    <string name="settings_sheet_version_history">Version history</string>
+    <string name="settings_sheet_version_latest">Version 1.0.0 (Latest)</string>
+    
+    <string name="changelog_point_1">• Scientific mathematical engine supporting basic operators.</string>
+    <string name="changelog_point_3">• Real-time interactive calculation history with multi-selection delete and bulk clear support.</string>
+    <string name="changelog_point_4">• Premium style customization with dynamic themes and Google Fonts integration.</string>
+    <string name="changelog_point_5">• Customizable number formatting including decimal precision settings and thousands separator preference.</string>
+
+    <!-- Keyboard Feedback -->
+    <string name="settings_section_keyboard_feedback">Keyboard Feedback</string>
+    <string name="settings_option_sound_feedback">Sound feedback</string>
+    <string name="settings_desc_sound_feedback">Play click sounds when keys are tapped</string>
+    <string name="settings_option_haptic_feedback">Haptic feedback</string>
+    <string name="settings_desc_haptic_feedback">Vibrate when keys are pressed</string>
+
+    <!-- Privacy Notice -->
+    <string name="settings_option_privacy_notice">Privacy notice</string>
+    <string name="settings_sheet_privacy_title">Privacy Notice</string>
+    <string name="settings_privacy_paragraph_1">Ixeken Studios does not collect any usage data, personal analytics, or application activity. Nepo operates fully offline and is completely ad-free to respect your privacy.</string>
+    <string name="settings_privacy_paragraph_2">Network access is strictly limited and is only initialized when you manually trigger update checks or when the automatic update validation on startup is enabled.</string>
+
+    <!-- Credits -->
+    <string name="settings_option_created_by">Created by Ixeken Studios</string>
+    <string name="settings_pill_made_in_mexico">made in mexico 🇲🇽</string>
+
+    <!-- Formatting & Shared UI -->
+    <string name="settings_label_preview">Preview</string>
+    <string name="settings_label_precision">Precision</string>
+    <string name="settings_desc_precision">Number of decimal places</string>
+    <string name="settings_label_max">Max</string>
+    <string name="settings_separator_comma">Comma (,)</string>
+    <string name="settings_separator_space">Space</string>
+    <string name="settings_separator_quote">Quote (\')</string>
+    <string name="settings_dialog_btn_close">Close</string>
+    <string name="settings_theme_rustic_digital">Rustic digital</string>
+    <string name="settings_theme_glassy_premium">Glassy Premium</string>
+    <string name="settings_font_system_default">System default</string>
+</resources>

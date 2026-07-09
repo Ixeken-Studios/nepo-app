@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common Modes Selection Strings -->
+    <string name="settings_mode_basic">Basic</string>
+    <string name="settings_mode_scientific">Scientific</string>
+    <string name="settings_mode_converter">Unit converter</string>
+    <string name="settings_mode_calculator">Calculator</string>
+</resources>

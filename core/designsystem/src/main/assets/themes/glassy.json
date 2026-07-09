@@ -1,0 +1,41 @@
+{
+  "metadata": {
+    "id": "glassy_premium",
+    "displayName": "Glassy Premium",
+    "iconLibrary": "LUCIDE_ICONS",
+    "borderRadiusGlobal": 100
+  },
+  "structureStyle": "GLASSMORPHISM",
+  "settingsStyle": {
+    "useCards": true,
+    "cardBorderRadius": "32px",
+    "showMenuIcons": true,
+    "showDividers": false,
+    "showHeaderSeparators": false
+  },
+  "colors": {
+    "surfaces": {
+      "appBackground": "#000000",
+      "bottomSheetBackground": "#1C1C1E",
+      "calculatorScreenBackground": "#00000000"
+    },
+    "typography": {
+      "title": "#FFFFFF",
+      "headerAccent": "#FF9500",
+      "bodyPrimary": "#FFFFFF",
+      "bodySecondary": "#8E8E93",
+      "screenPrimary": "#FFFFFF",
+      "screenSecondary": "#8E8E93"
+    },
+    "interactiveComponents": {
+      "numbersButton": { "foreground": "#FFFFFF", "background": "#25FFFFFF" },
+      "operatorButton": { "foreground": "#FFFFFF", "background": "#FFFF9500" },
+      "confirmButton": { "foreground": "#FFFFFF", "background": "#FF9500" },
+      "deleteButton": { "foreground": "#FFFFFF", "background": "#40FFFFFF" }
+    },
+    "structuralElements": {
+      "headerSeparator": "#15FFFFFF",
+      "itemSeparator": "#15FFFFFF"
+    }
+  }
+}

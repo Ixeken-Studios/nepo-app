@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.Nepo" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#252422</item>
+        <item name="android:statusBarColor">#252422</item>
+        <item name="android:navigationBarColor">#252422</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="s">#252422</item>
+    </style>
+</resources>

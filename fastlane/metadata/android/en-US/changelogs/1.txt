@@ -1,0 +1,7 @@
+- Initial release of Nepo Modular Calculator.
+- Basic and scientific calculator modes supporting portrait and landscape orientations.
+- Dynamic theme system supporting Flat and Glassmorphism styling.
+- Local calculation history with date groupings and swipe-to-delete.
+- Support for 14 custom Google Fonts and default system font.
+- Dynamic sound and haptic key press feedback.
+- Completely offline, prioritizing user privacy.
