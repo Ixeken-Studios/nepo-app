@@ -24,6 +24,9 @@ import com.ixeken.nepo.features.calculator.data.SettingsRepository
 import com.ixeken.nepo.features.calculator.presentation.CalculatorViewModel
 import com.ixeken.nepo.features.calculator.ui.CalculatorScreen
 import com.ixeken.nepo.features.calculator.ui.SettingsScreen
+import com.ixeken.nepo.features.calculator.ui.checkGitHubUpdate
+import com.ixeken.nepo.features.calculator.ui.UpdateResult
+import com.ixeken.nepo.features.calculator.ui.NepoUpdateDialog
 import com.ixeken.nepo.features.converter.ui.ConverterScreen
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.googlefonts.Font
@@ -151,6 +154,19 @@ class MainActivity : ComponentActivity() {
                 val calcViewModel = remember { CalculatorViewModel(mathEngine) }
                 var currentScreen by rememberSaveable { mutableStateOf(AppScreen.CALCULATOR) }
 
+                var showStartUpdateDialog by remember { mutableStateOf(false) }
+                var startUpdateResult by remember { mutableStateOf<UpdateResult?>(null) }
+
+                LaunchedEffect(Unit) {
+                    if (settingsRepository.isCheckUpdateOnStartEnabled()) {
+                        val result = checkGitHubUpdate(context)
+                        if (result is UpdateResult.NewVersion) {
+                            startUpdateResult = result
+                            showStartUpdateDialog = true
+                        }
+                    }
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = androidx.compose.ui.graphics.Color.Transparent
@@ -198,6 +214,14 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                
+                NepoUpdateDialog(
+                    showDialog = showStartUpdateDialog,
+                    checkingUpdates = false,
+                    updateResult = startUpdateResult,
+                    onDismissRequest = { showStartUpdateDialog = false },
+                    onRetryClick = {}
+                )
                 }
             }
         }

@@ -89,6 +89,7 @@
     <string name="settings_separator_space">Space</string>
     <string name="settings_separator_quote">Quote (\')</string>
     <string name="settings_dialog_btn_close">Close</string>
+    <string name="settings_btn_back">Back</string>
     <string name="settings_theme_rustic_digital">Rustic digital</string>
     <string name="settings_theme_glassy_premium">Glassy Premium</string>
     <string name="settings_font_system_default">System default</string>

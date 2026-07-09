@@ -192,7 +192,7 @@ private fun SettingsHeader(
 
         // Action button (X close or back arrow)
         NepoButton(
-            text = if (isRoot) "Close" else "Back",
+            text = if (isRoot) stringResource(id = R.string.settings_dialog_btn_close) else stringResource(id = R.string.settings_btn_back),
             onClick = onBackClick,
             visualTokens = if (isRoot) {
                 theme.colors.interactiveComponents.closeButton
@@ -200,6 +200,7 @@ private fun SettingsHeader(
                 theme.colors.interactiveComponents.backButton
             },
             icon = if (isRoot) Lucide.X else Lucide.ArrowLeft,
+            iconBold = true,
             modifier = Modifier.size(36.dp)
         )
     }
@@ -507,10 +508,11 @@ private fun SettingsBottomSheet(
                         fontWeight = FontWeight.Bold
                     )
                     NepoButton(
-                        text = "Close",
+                        text = stringResource(id = R.string.settings_dialog_btn_close),
                         onClick = onDismissRequest,
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
+                        iconBold = true,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -1033,211 +1035,20 @@ private fun AboutScreen(
         }
     }
 
-    if (showUpdateDialog) {
-        val currentVersion = remember(context) {
-            try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
-            } catch (e: Exception) {
-                "1.0.0"
+    NepoUpdateDialog(
+        showDialog = showUpdateDialog,
+        checkingUpdates = checkingUpdates,
+        updateResult = updateResult,
+        onDismissRequest = { showUpdateDialog = false },
+        onRetryClick = {
+            checkingUpdates = true
+            updateResult = null
+            coroutineScope.launch {
+                updateResult = checkGitHubUpdate(context)
+                checkingUpdates = false
             }
         }
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = {
-                if (!checkingUpdates) showUpdateDialog = false
-            },
-            containerColor = theme.colors.surfaces.bottomSheetBackground,
-            title = {
-                Text(
-                    text = stringResource(id = R.string.settings_dialog_update_check),
-                    color = theme.colors.typography.bodyPrimary,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = fontFamily
-                )
-            },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    if (checkingUpdates) {
-                        androidx.compose.material3.CircularProgressIndicator(
-                            color = theme.colors.typography.headerAccent,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .padding(8.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(id = R.string.settings_dialog_checking_updates),
-                            color = theme.colors.typography.bodySecondary,
-                            fontSize = 14.sp,
-                            fontFamily = fontFamily
-                        )
-                    } else {
-                        when (val result = updateResult) {
-                            is UpdateResult.UpToDate -> {
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(CircleShape)
-                                        .background(theme.colors.typography.headerAccent),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = Lucide.Check,
-                                        contentDescription = "Up to date",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = stringResource(id = R.string.settings_dialog_up_to_date, currentVersion),
-                                    color = theme.colors.typography.bodyPrimary,
-                                    fontSize = 14.sp,
-                                    fontFamily = fontFamily,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                            is UpdateResult.NewVersion -> {
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(CircleShape)
-                                        .background(theme.colors.typography.headerAccent),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = Lucide.Sparkles,
-                                        contentDescription = "New version available",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = stringResource(id = R.string.settings_dialog_update_available, result.version),
-                                    color = theme.colors.typography.bodyPrimary,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = fontFamily,
-                                    textAlign = TextAlign.Center
-                                )
-                                if (!result.changelog.isNullOrBlank()) {
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(max = 120.dp)
-                                            .background(theme.colors.surfaces.appBackground, shape = RoundedCornerShape(8.dp))
-                                            .verticalScroll(rememberScrollState())
-                                            .padding(8.dp)
-                                    ) {
-                                        Text(
-                                            text = result.changelog,
-                                            color = theme.colors.typography.bodySecondary,
-                                            fontSize = 12.sp,
-                                            fontFamily = fontFamily
-                                        )
-                                    }
-                                }
-                            }
-                            is UpdateResult.Error, null -> {
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(CircleShape)
-                                        .background(theme.colors.typography.bodySecondary),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    androidx.compose.material3.Icon(
-                                        imageVector = Lucide.Info,
-                                        contentDescription = "Error",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Text(
-                                    text = stringResource(id = R.string.settings_dialog_update_error),
-                                    color = theme.colors.typography.bodyPrimary,
-                                    fontSize = 14.sp,
-                                    fontFamily = fontFamily,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                if (!checkingUpdates) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        when (val result = updateResult) {
-                            is UpdateResult.NewVersion -> {
-                                NepoButton(
-                                    text = stringResource(id = R.string.settings_dialog_btn_download),
-                                    onClick = {
-                                        showUpdateDialog = false
-                                        try {
-                                            uriHandler.openUri(result.downloadUrl)
-                                        } catch (e: Exception) {}
-                                    },
-                                    visualTokens = theme.colors.interactiveComponents.confirmButton,
-                                    fontSize = 14.sp,
-                                    padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                                NepoButton(
-                                    text = stringResource(id = R.string.settings_dialog_btn_close),
-                                    onClick = { showUpdateDialog = false },
-                                    visualTokens = theme.colors.interactiveComponents.closeButton,
-                                    fontSize = 14.sp,
-                                    padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                            is UpdateResult.Error, null -> {
-                                NepoButton(
-                                    text = stringResource(id = R.string.settings_dialog_btn_retry),
-                                    onClick = {
-                                        checkingUpdates = true
-                                        updateResult = null
-                                        coroutineScope.launch {
-                                            updateResult = checkGitHubUpdate(context)
-                                            checkingUpdates = false
-                                        }
-                                    },
-                                    visualTokens = theme.colors.interactiveComponents.confirmButton,
-                                    fontSize = 14.sp,
-                                    padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                                NepoButton(
-                                    text = stringResource(id = R.string.settings_dialog_btn_close),
-                                    onClick = { showUpdateDialog = false },
-                                    visualTokens = theme.colors.interactiveComponents.closeButton,
-                                    fontSize = 14.sp,
-                                    padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                            is UpdateResult.UpToDate -> {
-                                NepoButton(
-                                    text = stringResource(id = R.string.settings_dialog_btn_ok),
-                                    onClick = { showUpdateDialog = false },
-                                    visualTokens = theme.colors.interactiveComponents.confirmButton,
-                                    fontSize = 14.sp,
-                                    padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        )
-    }
+    )
 }
 
 @Composable
@@ -1394,7 +1205,7 @@ private fun CreditsMenuItem(
     }
 }
 
-private sealed interface UpdateResult {
+sealed interface UpdateResult {
     data object UpToDate : UpdateResult
     data class NewVersion(val version: String, val downloadUrl: String, val changelog: String?) : UpdateResult
     data object Error : UpdateResult
@@ -1430,7 +1241,7 @@ private fun isNewerVersion(current: String, latest: String): Boolean {
     return false
 }
 
-private suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
     var connection: java.net.HttpURLConnection? = null
     try {
         val url = java.net.URL("https://api.github.com/repos/Ixeken-Studios/nepo-app/releases/latest")
@@ -1471,4 +1282,217 @@ private suspend fun checkGitHubUpdate(context: android.content.Context): UpdateR
     } finally {
         connection?.disconnect()
     }
+}
+
+@Composable
+fun NepoUpdateDialog(
+    showDialog: Boolean,
+    checkingUpdates: Boolean,
+    updateResult: UpdateResult?,
+    onDismissRequest: () -> Unit,
+    onRetryClick: () -> Unit
+) {
+    if (!showDialog) return
+    val theme = LocalNepoTheme.current
+    val fontFamily = LocalNepoFontFamily.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    
+    val currentVersion = remember(context) {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
+    }
+    
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = {
+            if (!checkingUpdates) onDismissRequest()
+        },
+        containerColor = theme.colors.surfaces.bottomSheetBackground,
+        title = {
+            Text(
+                text = stringResource(id = R.string.settings_dialog_update_check),
+                color = theme.colors.typography.bodyPrimary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = fontFamily
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (checkingUpdates) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        color = theme.colors.typography.headerAccent,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(id = R.string.settings_dialog_checking_updates),
+                        color = theme.colors.typography.bodySecondary,
+                        fontSize = 14.sp,
+                        fontFamily = fontFamily
+                    )
+                } else {
+                    when (val result = updateResult) {
+                        is UpdateResult.UpToDate -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(theme.colors.typography.headerAccent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Lucide.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.settings_dialog_up_to_date, currentVersion),
+                                color = theme.colors.typography.bodyPrimary,
+                                fontSize = 14.sp,
+                                fontFamily = fontFamily,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        is UpdateResult.NewVersion -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(theme.colors.typography.headerAccent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Lucide.Sparkles,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.settings_dialog_update_available, result.version),
+                                color = theme.colors.typography.bodyPrimary,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = fontFamily,
+                                textAlign = TextAlign.Center
+                            )
+                            if (!result.changelog.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 120.dp)
+                                        .background(theme.colors.surfaces.appBackground, shape = RoundedCornerShape(8.dp))
+                                        .verticalScroll(rememberScrollState())
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = result.changelog,
+                                        color = theme.colors.typography.bodySecondary,
+                                        fontSize = 12.sp,
+                                        fontFamily = fontFamily
+                                    )
+                                }
+                            }
+                        }
+                        is UpdateResult.Error, null -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(theme.colors.typography.bodySecondary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Lucide.Info,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.settings_dialog_update_error),
+                                color = theme.colors.typography.bodyPrimary,
+                                fontSize = 14.sp,
+                                fontFamily = fontFamily,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (!checkingUpdates) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    when (val result = updateResult) {
+                        is UpdateResult.NewVersion -> {
+                            NepoButton(
+                                text = stringResource(id = R.string.settings_dialog_btn_download),
+                                onClick = {
+                                    onDismissRequest()
+                                    try {
+                                        uriHandler.openUri(result.downloadUrl)
+                                    } catch (e: Exception) {}
+                                },
+                                visualTokens = theme.colors.interactiveComponents.confirmButton,
+                                fontSize = 14.sp,
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            NepoButton(
+                                text = stringResource(id = R.string.settings_dialog_btn_close),
+                                onClick = onDismissRequest,
+                                visualTokens = theme.colors.interactiveComponents.closeButton,
+                                fontSize = 14.sp,
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                        is UpdateResult.Error, null -> {
+                            NepoButton(
+                                text = stringResource(id = R.string.settings_dialog_btn_retry),
+                                onClick = onRetryClick,
+                                visualTokens = theme.colors.interactiveComponents.confirmButton,
+                                fontSize = 14.sp,
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            NepoButton(
+                                text = stringResource(id = R.string.settings_dialog_btn_close),
+                                onClick = onDismissRequest,
+                                visualTokens = theme.colors.interactiveComponents.closeButton,
+                                fontSize = 14.sp,
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                        is UpdateResult.UpToDate -> {
+                            NepoButton(
+                                text = stringResource(id = R.string.settings_dialog_btn_ok),
+                                onClick = onDismissRequest,
+                                visualTokens = theme.colors.interactiveComponents.confirmButton,
+                                fontSize = 14.sp,
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    )
 }

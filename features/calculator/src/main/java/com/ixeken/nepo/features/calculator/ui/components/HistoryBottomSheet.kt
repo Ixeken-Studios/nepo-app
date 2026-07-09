@@ -147,6 +147,7 @@ fun HistoryBottomSheet(
                         onClick = onDismissRequest,
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
+                        iconBold = true,
                         modifier = Modifier
                             .width(36.dp)
                             .height(36.dp)
@@ -161,6 +162,7 @@ fun HistoryBottomSheet(
                         },
                         visualTokens = theme.colors.interactiveComponents.doneButton,
                         icon = Lucide.Check,
+                        iconBold = true,
                         modifier = Modifier
                             .width(36.dp)
                             .height(36.dp)
