@@ -55,11 +55,21 @@ fun NepoButton(
     fontSize: androidx.compose.ui.unit.TextUnit = androidx.compose.ui.unit.TextUnit.Unspecified,
     padding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(12.dp),
     iconBold: Boolean = false,
+    isKeyboardKey: Boolean = true,
     hazeState: HazeState? = null
 ) {
     val theme = LocalNepoTheme.current
     val fontFamily = LocalNepoFontFamily.current
-    val shape = RoundedCornerShape(theme.metadata.borderRadiusGlobal)
+    val shape = if (isKeyboardKey) {
+        when (theme.calculatorStyle.buttonShapeType) {
+            "CIRCLE" -> androidx.compose.foundation.shape.CircleShape
+            "SQUARE" -> RoundedCornerShape(0.dp)
+            "SQUIRCLE", "ROUNDED_RECTANGLE" -> RoundedCornerShape(theme.calculatorStyle.buttonBorderRadius)
+            else -> RoundedCornerShape(theme.metadata.borderRadiusGlobal)
+        }
+    } else {
+        RoundedCornerShape(theme.metadata.borderRadiusGlobal)
+    }
     val isGlass = theme.structureStyle == StructureStyleType.GLASSMORPHISM
 
     val context = androidx.compose.ui.platform.LocalContext.current

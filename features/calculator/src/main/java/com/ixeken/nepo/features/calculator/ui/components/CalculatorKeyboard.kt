@@ -521,7 +521,7 @@ private fun ScientificTextButton(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val height = if (isLandscape) 30.dp else 36.dp
-    val resolvedColor = textColor ?: theme.colors.typography.bodyPrimary
+    val resolvedColor = textColor ?: theme.colors.typography.scientificOperators
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val settingsRepository = remember { com.ixeken.nepo.features.calculator.data.SettingsRepository(context) }

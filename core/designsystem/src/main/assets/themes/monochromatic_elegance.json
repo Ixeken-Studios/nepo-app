@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "id": "monochromatic_elegance",
+    "display_name": "Monochromatic Elegance",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "24px",
+    "default_font_name": "Outfit"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "24px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": true
+  },
+  "calculator_style": {
+    "visor_show_card": false,
+    "visor_border_radius": "0px",
+    "visor_card_border_radius_top": "0px",
+    "visor_card_border_radius_bottom": "0px",
+    "keyboard_show_card": false,
+    "keyboard_card_background": "#1c1c1c",
+    "keyboard_card_border_radius_top": "0px",
+    "keyboard_card_border_radius_bottom": "0px",
+    "button_shape_type": "CIRCLE",
+    "button_border_radius": "24px",
+    "outer_card_padding": "0px"
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#1c1c1c",
+      "bottom_sheet_background": "#1c1c1c",
+      "calculator_screen_background": "#1c1c1c"
+    },
+    "typography": {
+      "title": "#e8eaec",
+      "header_accent": "#babbbd",
+      "body_primary": "#e8eaec",
+      "body_secondary": "#babbbd",
+      "screen_primary": "#e8eaec",
+      "screen_secondary": "#babbbd",
+      "screen_icons": "#1c1c1c",
+      "scientific_operators": "#e8eaec"
+    },
+    "interactive_components": {
+      "numbers_button": {
+        "text": "#e8eaec",
+        "background": "#373737"
+      },
+      "operator_button": {
+        "text": "#1c1c1c",
+        "background": "#babbbd"
+      },
+      "delete_button": {
+        "text": "#e8eaec",
+        "background": "#515152"
+      },
+      "done_button": {
+        "text": "#1c1c1c",
+        "background": "#babbbd"
+      },
+      "confirm_button": {
+        "text": "#1c1c1c",
+        "background": "#babbbd"
+      },
+      "back_button": {
+        "text": "#e8eaec",
+        "background": "#373737"
+      },
+      "close_button": {
+        "text": "#e8eaec",
+        "background": "#373737"
+      },
+      "select_button": {
+        "text": "#e8eaec",
+        "background": "#373737"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#373737",
+      "item_separator": "#373737"
+    }
+  }
+}

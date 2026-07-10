@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "id": "revolution_hue",
+    "display_name": "Revolution hue",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "16px",
+    "default_font_name": "Josefin Sans"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "16px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": true
+  },
+  "calculator_style": {
+    "visor_show_card": true,
+    "visor_border_radius": "16px",
+    "visor_card_border_radius_top": "0px",
+    "visor_card_border_radius_bottom": "16px",
+    "keyboard_show_card": true,
+    "keyboard_card_background": "#373D20",
+    "keyboard_card_border_radius_top": "16px",
+    "keyboard_card_border_radius_bottom": "0px",
+    "button_shape_type": "ROUNDED_RECTANGLE",
+    "button_border_radius": "16px",
+    "outer_card_padding": "0px"
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#373D20",
+      "bottom_sheet_background": "#373D20",
+      "calculator_screen_background": "#A2A578"
+    },
+    "typography": {
+      "title": "#EFF1ED",
+      "header_accent": "#9A031E",
+      "body_primary": "#EFF1ED",
+      "body_secondary": "#A2A578",
+      "screen_primary": "#373D20",
+      "screen_secondary": "#717744"
+    },
+    "interactive_components": {
+      "numbers_button": {
+        "text": "#EFF1ED",
+        "background": "#717744"
+      },
+      "operator_button": {
+        "text": "#EFF1ED",
+        "background": "#9A031E"
+      },
+      "delete_button": {
+        "text": "#EFF1ED",
+        "background": "#A2A578"
+      },
+      "done_button": {
+        "text": "#EFF1ED",
+        "background": "#9A031E"
+      },
+      "confirm_button": {
+        "text": "#EFF1ED",
+        "background": "#9A031E"
+      },
+      "back_button": {
+        "text": "#EFF1ED",
+        "background": "#9A031E"
+      },
+      "close_button": {
+        "text": "#EFF1ED",
+        "background": "#9A031E"
+      },
+      "select_button": {
+        "text": "#EFF1ED",
+        "background": "#A2A578"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#9A031E",
+      "item_separator": "#717744"
+    }
+  }
+}

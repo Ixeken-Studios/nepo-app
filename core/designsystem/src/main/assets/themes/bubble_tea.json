@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "id": "bubble_tea",
+    "display_name": "Bubble tea",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "32px",
+    "default_font_name": "Outfit"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "32px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": true
+  },
+  "calculator_style": {
+    "visor_show_card": true,
+    "visor_border_radius": "32px",
+    "visor_card_border_radius_top": "32px",
+    "visor_card_border_radius_bottom": "32px",
+    "keyboard_show_card": true,
+    "keyboard_card_background": "#815f51",
+    "keyboard_card_border_radius_top": "32px",
+    "keyboard_card_border_radius_bottom": "32px",
+    "button_shape_type": "CIRCLE",
+    "button_border_radius": "32px",
+    "outer_card_padding": "12px"
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#36241c",
+      "bottom_sheet_background": "#36241c",
+      "calculator_screen_background": "#815f51"
+    },
+    "typography": {
+      "title": "#F9F5F3",
+      "header_accent": "#815f51",
+      "body_primary": "#F9F5F3",
+      "body_secondary": "#D3B6AB",
+      "screen_primary": "#F9F5F3",
+      "screen_secondary": "#E6D5CE",
+      "screen_icons": "#F9F5F3",
+      "scientific_operators": "#F9F5F3"
+    },
+    "interactive_components": {
+      "numbers_button": {
+        "text": "#F9F5F3",
+        "background": "#4d3328"
+      },
+      "operator_button": {
+        "text": "#F9F5F3",
+        "background": "#36241c"
+      },
+      "delete_button": {
+        "text": "#F9F5F3",
+        "background": "#422c22"
+      },
+      "done_button": {
+        "text": "#F9F5F3",
+        "background": "#36241c"
+      },
+      "confirm_button": {
+        "text": "#F9F5F3",
+        "background": "#815f51"
+      },
+      "back_button": {
+        "text": "#F9F5F3",
+        "background": "#4d3328"
+      },
+      "close_button": {
+        "text": "#F9F5F3",
+        "background": "#4d3328"
+      },
+      "select_button": {
+        "text": "#F9F5F3",
+        "background": "#4d3328"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#4d3328",
+      "item_separator": "#4d3328"
+    }
+  }
+}

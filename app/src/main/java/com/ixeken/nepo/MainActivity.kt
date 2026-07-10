@@ -95,8 +95,16 @@ class MainActivity : ComponentActivity() {
             val activeTheme = remember(themeUpdateTrigger) {
                 try {
                     val themeId = settingsRepository.getThemeId()
-                    val themeFile = if (themeId == "glassy_premium") "themes/glassy.json" else "themes/rustic_digital.json"
-                    ThemeParser.parseTheme(context, themeFile)
+                    val themeFile = when (themeId) {
+                        "glassy_premium" -> "themes/glassy.json"
+                        "rustic_digital" -> "themes/rustic_digital.json"
+                        else -> "themes/$themeId.json"
+                    }
+                    try {
+                        ThemeParser.parseTheme(context, themeFile)
+                    } catch (ex: Exception) {
+                        ThemeParser.parseTheme(context, "themes/rustic_digital.json")
+                    }
                 } catch (e: Exception) {
                     try {
                         ThemeParser.parseTheme(context, "themes/rustic_digital.json")
@@ -144,9 +152,14 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val activeFontFamily = remember(themeUpdateTrigger) {
+            val activeFontFamily = remember(themeUpdateTrigger, activeTheme) {
                 val fontName = settingsRepository.getFontName()
-                getGoogleFontFamily(fontName)
+                val resolvedFontName = if (fontName == "Theme default") {
+                    activeTheme.metadata.defaultFontName
+                } else {
+                    fontName
+                }
+                getGoogleFontFamily(resolvedFontName)
             }
 
             NepoTheme(currentStyles = activeTheme, fontFamily = activeFontFamily) {

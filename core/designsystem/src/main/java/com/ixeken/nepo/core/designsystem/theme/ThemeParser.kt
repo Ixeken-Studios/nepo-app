@@ -22,7 +22,9 @@ object ThemeParser {
         @SerializedName(value = "icons_library", alternate = ["iconLibrary"])
         val icons_library: String,
         @SerializedName(value = "border_radius_global", alternate = ["borderRadiusGlobal"])
-        val border_radius_global: String
+        val border_radius_global: String,
+        @SerializedName(value = "default_font_name", alternate = ["defaultFontName"])
+        val default_font_name: String?
     )
     
     private data class JsonSurfaceColors(
@@ -45,7 +47,11 @@ object ThemeParser {
         @SerializedName(value = "screen_primary", alternate = ["screenPrimary"])
         val screen_primary: String,
         @SerializedName(value = "screen_secondary", alternate = ["screenSecondary"])
-        val screen_secondary: String
+        val screen_secondary: String,
+        @SerializedName(value = "screen_icons", alternate = ["screenIcons"])
+        val screen_icons: String?,
+        @SerializedName(value = "scientific_operators", alternate = ["scientificOperators"])
+        val scientific_operators: String?
     )
     
     private data class JsonComponentTokens(
@@ -103,12 +109,45 @@ object ThemeParser {
         val show_header_separators: Boolean?
     )
 
+    private data class JsonCalculatorStyle(
+        @SerializedName(value = "visor_show_card", alternate = ["visorShowCard"])
+        val visor_show_card: Boolean?,
+        @SerializedName(value = "visor_border_radius", alternate = ["visorBorderRadius"])
+        val visor_border_radius: String?,
+        @SerializedName(value = "visor_card_border_radius_top", alternate = ["visorCardBorderRadiusTop"])
+        val visor_card_border_radius_top: String?,
+        @SerializedName(value = "visor_card_border_radius_bottom", alternate = ["visorCardBorderRadiusBottom"])
+        val visor_card_border_radius_bottom: String?,
+        @SerializedName(value = "keyboard_show_card", alternate = ["keyboardShowCard"])
+        val keyboard_show_card: Boolean?,
+        @SerializedName(value = "keyboard_card_background", alternate = ["keyboardCardBackground"])
+        val keyboard_card_background: String?,
+        @SerializedName(value = "keyboard_card_border_radius_top", alternate = ["keyboardCardBorderRadiusTop"])
+        val keyboard_card_border_radius_top: String?,
+        @SerializedName(value = "keyboard_card_border_radius_bottom", alternate = ["keyboardCardBorderRadiusBottom"])
+        val keyboard_card_border_radius_bottom: String?,
+        @SerializedName(value = "button_shape_type", alternate = ["buttonShapeType"])
+        val button_shape_type: String?,
+        @SerializedName(value = "button_border_radius", alternate = ["buttonBorderRadius"])
+        val button_border_radius: String?,
+        @SerializedName(value = "outer_card_padding", alternate = ["outerCardPadding"])
+        val outer_card_padding: String?,
+        @SerializedName(value = "outer_card_border_width", alternate = ["outerCardBorderWidth"])
+        val outer_card_border_width: String?,
+        @SerializedName(value = "outer_card_border_color", alternate = ["outerCardBorderColor"])
+        val outer_card_border_color: String?,
+        @SerializedName(value = "outer_card_background", alternate = ["outerCardBackground"])
+        val outer_card_background: String?
+    )
+
     private data class JsonThemeStyles(
         val metadata: JsonThemeMetadata,
         @SerializedName(value = "structure_style", alternate = ["structureStyle"])
         val structure_style: String?,
         @SerializedName(value = "settings_style", alternate = ["settingsStyle"])
         val settings_style: JsonSettingsStyle?,
+        @SerializedName(value = "calculator_style", alternate = ["calculatorStyle"])
+        val calculator_style: JsonCalculatorStyle?,
         val colors: JsonThemeColors
     )
 
@@ -145,7 +184,8 @@ object ThemeParser {
                 parseDp(jsonStyles.metadata.border_radius_global)
             } catch (e: Exception) {
                 16.dp
-            }
+            },
+            defaultFontName = jsonStyles.metadata.default_font_name ?: "DM Mono"
         )
         
         val surfaces = SurfaceColors(
@@ -160,7 +200,9 @@ object ThemeParser {
             bodyPrimary = parseColor(jsonStyles.colors.typography.body_primary),
             bodySecondary = parseColor(jsonStyles.colors.typography.body_secondary),
             screenPrimary = parseColor(jsonStyles.colors.typography.screen_primary),
-            screenSecondary = parseColor(jsonStyles.colors.typography.screen_secondary)
+            screenSecondary = parseColor(jsonStyles.colors.typography.screen_secondary),
+            screenIcons = jsonStyles.colors.typography.screen_icons?.let { parseColor(it) } ?: parseColor(jsonStyles.colors.typography.screen_primary),
+            scientificOperators = jsonStyles.colors.typography.scientific_operators?.let { parseColor(it) } ?: parseColor(jsonStyles.colors.typography.body_primary)
         )
         
         val numbersBtn = jsonStyles.colors.interactive_components.numbers_button!!
@@ -222,12 +264,79 @@ object ThemeParser {
         } else {
             SettingsStyle()
         }
+
+        val jsonCalculatorStyle = jsonStyles.calculator_style
+        val calculatorStyle = if (jsonCalculatorStyle != null) {
+            CalculatorStyle(
+                visorShowCard = jsonCalculatorStyle.visor_show_card ?: true,
+                visorBorderRadius = try {
+                    jsonCalculatorStyle.visor_border_radius?.let { parseDp(it) } ?: 16.dp
+                } catch (e: Exception) {
+                    16.dp
+                },
+                visorCardBorderRadiusTop = try {
+                    jsonCalculatorStyle.visor_card_border_radius_top?.let { parseDp(it) } ?: (jsonCalculatorStyle.visor_border_radius?.let { parseDp(it) } ?: 16.dp)
+                } catch (e: Exception) {
+                    16.dp
+                },
+                visorCardBorderRadiusBottom = try {
+                    jsonCalculatorStyle.visor_card_border_radius_bottom?.let { parseDp(it) } ?: (jsonCalculatorStyle.visor_border_radius?.let { parseDp(it) } ?: 16.dp)
+                } catch (e: Exception) {
+                    16.dp
+                },
+                keyboardShowCard = jsonCalculatorStyle.keyboard_show_card ?: false,
+                keyboardCardBackground = try {
+                    jsonCalculatorStyle.keyboard_card_background?.let { parseColor(it) } ?: Color.Transparent
+                } catch (e: Exception) {
+                    Color.Transparent
+                },
+                keyboardCardBorderRadiusTop = try {
+                    jsonCalculatorStyle.keyboard_card_border_radius_top?.let { parseDp(it) } ?: 0.dp
+                } catch (e: Exception) {
+                    0.dp
+                },
+                keyboardCardBorderRadiusBottom = try {
+                    jsonCalculatorStyle.keyboard_card_border_radius_bottom?.let { parseDp(it) } ?: 0.dp
+                } catch (e: Exception) {
+                    0.dp
+                },
+                buttonShapeType = jsonCalculatorStyle.button_shape_type ?: "ROUNDED_RECTANGLE",
+                buttonBorderRadius = try {
+                    jsonCalculatorStyle.button_border_radius?.let { parseDp(it) } ?: 16.dp
+                } catch (e: Exception) {
+                    16.dp
+                },
+                outerCardPadding = try {
+                    jsonCalculatorStyle.outer_card_padding?.let { parseDp(it) } ?: 8.dp
+                } catch (e: Exception) {
+                    8.dp
+                },
+                outerCardBorderWidth = try {
+                    jsonCalculatorStyle.outer_card_border_width?.let { parseDp(it) } ?: 0.dp
+                } catch (e: Exception) {
+                    0.dp
+                },
+                outerCardBorderColor = try {
+                    jsonCalculatorStyle.outer_card_border_color?.let { parseColor(it) } ?: Color.Transparent
+                } catch (e: Exception) {
+                    Color.Transparent
+                },
+                outerCardBackground = try {
+                    jsonCalculatorStyle.outer_card_background?.let { parseColor(it) } ?: Color.Transparent
+                } catch (e: Exception) {
+                    Color.Transparent
+                }
+            )
+        } else {
+            CalculatorStyle()
+        }
         
         return NepoThemeStyles(
             metadata = metadata,
             colors = colors,
             structureStyle = structureStyle,
-            settingsStyle = settingsStyle
+            settingsStyle = settingsStyle,
+            calculatorStyle = calculatorStyle
         )
     }
 }

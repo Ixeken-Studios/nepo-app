@@ -89,7 +89,7 @@ class SettingsRepository(context: Context) {
      * Gets the active font family name. Defaults to "DM Mono".
      */
     fun getFontName(): String {
-        return prefs.getString(KEY_FONT, "DM Mono") ?: "DM Mono"
+        return prefs.getString(KEY_FONT, "Theme default") ?: "Theme default"
     }
 
     /**

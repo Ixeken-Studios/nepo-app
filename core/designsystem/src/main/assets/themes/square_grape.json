@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "id": "square_grape",
+    "display_name": "Square Grape",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "8px",
+    "default_font_name": "Google Sans Flex"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "8px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": true
+  },
+  "calculator_style": {
+    "visor_show_card": true,
+    "visor_border_radius": "0px",
+    "visor_card_border_radius_top": "0px",
+    "visor_card_border_radius_bottom": "0px",
+    "keyboard_show_card": true,
+    "keyboard_card_background": "#22223b",
+    "keyboard_card_border_radius_top": "0px",
+    "keyboard_card_border_radius_bottom": "0px",
+    "button_shape_type": "SQUARE",
+    "button_border_radius": "0px",
+    "outer_card_padding": "0px"
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#22223b",
+      "bottom_sheet_background": "#22223b",
+      "calculator_screen_background": "#4a4e69"
+    },
+    "typography": {
+      "title": "#f2e9e4",
+      "header_accent": "#707599",
+      "body_primary": "#f2e9e4",
+      "body_secondary": "#707599",
+      "screen_primary": "#22223b",
+      "screen_secondary": "#707599"
+    },
+    "interactive_components": {
+      "numbers_button": {
+        "text": "#707599",
+        "background": "#00000000"
+      },
+      "operator_button": {
+        "text": "#f2e9e4",
+        "background": "#00000000"
+      },
+      "delete_button": {
+        "text": "#f2e9e4",
+        "background": "#00000000"
+      },
+      "done_button": {
+        "text": "#f2e9e4",
+        "background": "#00000000"
+      },
+      "confirm_button": {
+        "text": "#f2e9e4",
+        "background": "#707599"
+      },
+      "back_button": {
+        "text": "#f2e9e4",
+        "background": "#4a4e69"
+      },
+      "close_button": {
+        "text": "#f2e9e4",
+        "background": "#4a4e69"
+      },
+      "select_button": {
+        "text": "#f2e9e4",
+        "background": "#4a4e69"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#4a4e69",
+      "item_separator": "#4a4e69"
+    }
+  }
+}

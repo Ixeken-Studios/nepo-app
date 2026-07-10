@@ -94,8 +94,16 @@ fun CalculatorScreen(
     val activeTheme = remember(themeUpdateTrigger) {
         try {
             val themeId = settingsRepository.getThemeId()
-            val themeFile = if (themeId == "glassy_premium") "themes/glassy.json" else "themes/rustic_digital.json"
-            ThemeParser.parseTheme(context, themeFile)
+            val themeFile = when (themeId) {
+                "glassy_premium" -> "themes/glassy.json"
+                "rustic_digital" -> "themes/rustic_digital.json"
+                else -> "themes/$themeId.json"
+            }
+            try {
+                ThemeParser.parseTheme(context, themeFile)
+            } catch (ex: Exception) {
+                ThemeParser.parseTheme(context, "themes/rustic_digital.json")
+            }
         } catch (e: Exception) {
             // Fallback in case of parse failure
             defaultTheme
@@ -171,12 +179,27 @@ fun CalculatorScreen(
         val maxPartialSize = if (isLandscape) 18.sp else 20.sp
 
         val displayCard = @Composable { cardModifier: Modifier ->
-            val displayShape = RoundedCornerShape(theme.metadata.borderRadiusGlobal)
+            val showCard = theme.calculatorStyle.visorShowCard
+            val displayShape = RoundedCornerShape(
+                topStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
+                topEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
+                bottomStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp,
+                bottomEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp
+            )
             Column(
                 modifier = cardModifier
-                    .background(
-                        color = theme.colors.surfaces.calculatorScreenBackground,
-                        shape = displayShape
+                    .then(
+                        if (showCard) {
+                            Modifier.background(
+                                color = theme.colors.surfaces.calculatorScreenBackground,
+                                shape = displayShape
+                            )
+                        } else Modifier
+                    )
+                    .then(
+                        if (theme.calculatorStyle.outerCardPadding == 0.dp) {
+                            Modifier.statusBarsPadding()
+                        } else Modifier
                     )
                     .padding(if (currentMode == "CONVERTER") 12.dp else 16.dp)
             ) {
@@ -192,6 +215,8 @@ fun CalculatorScreen(
                             .size(40.dp)
                             .then(
                                 if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -203,7 +228,7 @@ fun CalculatorScreen(
                         Icon(
                             imageVector = Lucide.History,
                             contentDescription = "Open history log",
-                            tint = theme.colors.typography.screenPrimary,
+                            tint = theme.colors.typography.screenIcons,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -215,7 +240,9 @@ fun CalculatorScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .then(
-                                if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = CircleShape)
+                                if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -227,7 +254,7 @@ fun CalculatorScreen(
                         Icon(
                             imageVector = Lucide.SquareMenu,
                             contentDescription = "Change calculator mode",
-                            tint = theme.colors.typography.screenPrimary,
+                            tint = theme.colors.typography.screenIcons,
                             modifier = Modifier.size(20.dp)
                         )
 
@@ -442,6 +469,8 @@ fun CalculatorScreen(
                             .size(40.dp)
                             .then(
                                 if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -453,7 +482,7 @@ fun CalculatorScreen(
                         Icon(
                             imageVector = Lucide.SlidersHorizontal,
                             contentDescription = "Open settings configuration",
-                            tint = theme.colors.typography.screenPrimary,
+                            tint = theme.colors.typography.screenIcons,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -710,21 +739,61 @@ fun CalculatorScreen(
         }
 
         val isInversedMode by viewModel.isInversedMode.collectAsState()
-
         val keyboardContent = @Composable { keyboardModifier: Modifier ->
-            CalculatorKeyboard(
-                onEvent = viewModel::onEvent,
-                mode = currentMode,
-                isDegreeMode = isDegreeMode,
-                isInversedMode = isInversedMode,
-                onToggleDegreeMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleDegreeMode) },
-                onToggleInversedMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleInversedMode) },
-                modifier = keyboardModifier,
-                hazeState = if (isGlass) hazeState else null
-            )
+            val showKeyboardCard = theme.calculatorStyle.keyboardShowCard
+            if (showKeyboardCard) {
+                val keyboardShape = RoundedCornerShape(
+                    topStart = theme.calculatorStyle.keyboardCardBorderRadiusTop,
+                    topEnd = theme.calculatorStyle.keyboardCardBorderRadiusTop,
+                    bottomStart = theme.calculatorStyle.keyboardCardBorderRadiusBottom,
+                    bottomEnd = theme.calculatorStyle.keyboardCardBorderRadiusBottom
+                )
+                Box(
+                    modifier = keyboardModifier
+                        .background(
+                            color = theme.calculatorStyle.keyboardCardBackground,
+                            shape = keyboardShape
+                        )
+                        .then(
+                            if (theme.calculatorStyle.outerCardPadding == 0.dp) {
+                                Modifier.navigationBarsPadding()
+                            } else Modifier
+                        )
+                        .padding(8.dp)
+                ) {
+                    CalculatorKeyboard(
+                        onEvent = viewModel::onEvent,
+                        mode = currentMode,
+                        isDegreeMode = isDegreeMode,
+                        isInversedMode = isInversedMode,
+                        onToggleDegreeMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleDegreeMode) },
+                        onToggleInversedMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleInversedMode) },
+                        modifier = if (isLandscape) Modifier.fillMaxSize() else Modifier.fillMaxWidth(),
+                        hazeState = if (isGlass) hazeState else null
+                    )
+                }
+            } else {
+                CalculatorKeyboard(
+                    onEvent = viewModel::onEvent,
+                    mode = currentMode,
+                    isDegreeMode = isDegreeMode,
+                    isInversedMode = isInversedMode,
+                    onToggleDegreeMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleDegreeMode) },
+                    onToggleInversedMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleInversedMode) },
+                    modifier = keyboardModifier
+                        .then(
+                            if (theme.calculatorStyle.outerCardPadding == 0.dp) {
+                                Modifier.navigationBarsPadding()
+                            } else Modifier
+                        ),
+                    hazeState = if (isGlass) hazeState else null
+                )
+            }
         }
 
-        Column(
+        val hasOuterCard = theme.calculatorStyle.outerCardPadding > 0.dp || theme.calculatorStyle.outerCardBackground != Color.Transparent || theme.calculatorStyle.outerCardBorderWidth > 0.dp
+
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(theme.colors.surfaces.appBackground)
@@ -732,61 +801,88 @@ fun CalculatorScreen(
                     if (isGlass) Modifier.hazeSource(state = hazeState)
                     else Modifier
                 )
-                .safeDrawingPadding()
-                .padding(8.dp)
+                .then(
+                    if (theme.calculatorStyle.outerCardPadding > 0.dp) {
+                        Modifier.safeDrawingPadding()
+                    } else Modifier
+                )
         ) {
-            if (isLandscape) {
-                Row(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val visorWeight = if (currentMode == "SCIENTIFIC") 0.35f else 0.45f
-                    val keyboardWeight = if (currentMode == "SCIENTIFIC") 0.65f else 0.55f
-                    Column(
-                        modifier = Modifier.weight(visorWeight).fillMaxHeight()
-                    ) {
-                        displayCard(Modifier.weight(1f).fillMaxWidth())
-                        if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            UnitSelectorRow(
-                                sourceUnit = sourceUnit,
-                                targetUnit = targetUnit,
-                                onSourceClick = { showSourceUnitSheet = true },
-                                onTargetClick = { showTargetUnitSheet = true },
-                                onSwapClick = {
-                                    val temp = sourceUnit
-                                    sourceUnit = targetUnit
-                                    targetUnit = temp
-                                    settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
-                                    settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
-                                }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(if (hasOuterCard) theme.calculatorStyle.outerCardPadding else 0.dp)
+                    .then(
+                        if (hasOuterCard && theme.calculatorStyle.outerCardBackground != Color.Transparent) {
+                            Modifier.background(
+                                color = theme.calculatorStyle.outerCardBackground,
+                                shape = RoundedCornerShape(theme.metadata.borderRadiusGlobal)
                             )
-                        }
-                    }
-                    keyboardContent(Modifier.weight(keyboardWeight).fillMaxHeight())
-                }
-            } else {
-                displayCard(Modifier.fillMaxWidth().weight(1.0f))
-                if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    UnitSelectorRow(
-                        sourceUnit = sourceUnit,
-                        targetUnit = targetUnit,
-                        onSourceClick = { showSourceUnitSheet = true },
-                        onTargetClick = { showTargetUnitSheet = true },
-                        onSwapClick = {
-                            val temp = sourceUnit
-                            sourceUnit = targetUnit
-                            targetUnit = temp
-                            settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
-                            settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
-                        }
+                        } else Modifier
                     )
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                keyboardContent(Modifier.fillMaxWidth())
+                    .then(
+                        if (hasOuterCard && theme.calculatorStyle.outerCardBorderWidth > 0.dp && theme.calculatorStyle.outerCardBorderColor != Color.Transparent) {
+                            Modifier.border(
+                                width = theme.calculatorStyle.outerCardBorderWidth,
+                                color = theme.calculatorStyle.outerCardBorderColor,
+                                shape = RoundedCornerShape(theme.metadata.borderRadiusGlobal)
+                            )
+                        } else Modifier
+                    )
+                    .padding(if (hasOuterCard) 8.dp else theme.calculatorStyle.outerCardPadding)
+            ) {
+                if (isLandscape) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val visorWeight = if (currentMode == "SCIENTIFIC") 0.35f else 0.45f
+                        val keyboardWeight = if (currentMode == "SCIENTIFIC") 0.65f else 0.55f
+                        Column(
+                            modifier = Modifier.weight(visorWeight).fillMaxHeight()
+                        ) {
+                            displayCard(Modifier.weight(1f).fillMaxWidth())
+                            if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                UnitSelectorRow(
+                                    sourceUnit = sourceUnit,
+                                    targetUnit = targetUnit,
+                                    onSourceClick = { showSourceUnitSheet = true },
+                                    onTargetClick = { showTargetUnitSheet = true },
+                                    onSwapClick = {
+                                        val temp = sourceUnit
+                                        sourceUnit = targetUnit
+                                        targetUnit = temp
+                                        settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                        settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                                    }
+                                )
+                            }
+                        }
+                        keyboardContent(Modifier.weight(keyboardWeight).fillMaxHeight())
+                    }
+                } else {
+                    displayCard(Modifier.fillMaxWidth().weight(1.0f))
+                    if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        UnitSelectorRow(
+                            sourceUnit = sourceUnit,
+                            targetUnit = targetUnit,
+                            onSourceClick = { showSourceUnitSheet = true },
+                            onTargetClick = { showTargetUnitSheet = true },
+                            onSwapClick = {
+                                val temp = sourceUnit
+                                sourceUnit = targetUnit
+                                targetUnit = temp
+                                settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    keyboardContent(Modifier.fillMaxWidth())
             }
         }
+    }
 
             // History Bottom Sheet overlay
             if (showHistorySheet) {

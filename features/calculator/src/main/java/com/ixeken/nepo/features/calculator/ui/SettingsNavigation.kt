@@ -205,6 +205,7 @@ private fun SettingsHeader(
             },
             icon = if (isRoot) Lucide.X else Lucide.ArrowLeft,
             iconBold = true,
+            isKeyboardKey = false,
             modifier = Modifier.size(36.dp)
         )
     }
@@ -537,6 +538,7 @@ private fun SettingsBottomSheet(
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
                         iconBold = true,
+                        isKeyboardKey = false,
                         modifier = Modifier.size(36.dp)
                     )
                 }
@@ -635,9 +637,49 @@ private fun AppearanceScreen(
                 SelectMenuItem(
                     title = stringResource(id = R.string.settings_theme_glassy_premium),
                     isSelected = currentTheme == "glassy_premium",
-                    isLast = true,
                     onClick = {
                         settingsRepository.setThemeId("glassy_premium")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_revolution_hue),
+                    isSelected = currentTheme == "revolution_hue",
+                    onClick = {
+                        settingsRepository.setThemeId("revolution_hue")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_square_grape),
+                    isSelected = currentTheme == "square_grape",
+                    onClick = {
+                        settingsRepository.setThemeId("square_grape")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_yellow_harmony),
+                    isSelected = currentTheme == "yellow_harmony",
+                    onClick = {
+                        settingsRepository.setThemeId("yellow_harmony")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_bubble_tea),
+                    isSelected = currentTheme == "bubble_tea",
+                    onClick = {
+                        settingsRepository.setThemeId("bubble_tea")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_monochromatic_elegance),
+                    isSelected = currentTheme == "monochromatic_elegance",
+                    isLast = true,
+                    onClick = {
+                        settingsRepository.setThemeId("monochromatic_elegance")
                         onThemeChanged()
                     }
                 )
@@ -647,6 +689,7 @@ private fun AppearanceScreen(
     if (showFontsSheet) {
         val activeFont = settingsRepository.getFontName()
         val fonts = listOf(
+            "Theme default",
             "System default",
             "Courier Prime",
             "DM Mono",
@@ -671,8 +714,18 @@ private fun AppearanceScreen(
             SettingsCard {
                 fonts.forEachIndexed { index, fontName ->
                     val isSelected = fontName == activeFont
-                    val fontFamily = remember(fontName) { getPreviewFontFamily(fontName) }
-                    val titleText = if (fontName == "System default") stringResource(id = R.string.settings_font_system_default) else fontName
+                    val fontFamily = remember(fontName, theme) {
+                        if (fontName == "Theme default") {
+                            getPreviewFontFamily(theme.metadata.defaultFontName)
+                        } else {
+                            getPreviewFontFamily(fontName)
+                        }
+                    }
+                    val titleText = when (fontName) {
+                        "Theme default" -> stringResource(id = R.string.settings_font_theme_default)
+                        "System default" -> stringResource(id = R.string.settings_font_system_default)
+                        else -> fontName
+                    }
                     SelectMenuItem(
                         title = titleText,
                         isSelected = isSelected,
@@ -1103,14 +1156,16 @@ private fun AboutScreen(
                         },
                         visualTokens = theme.colors.interactiveComponents.confirmButton,
                         fontSize = 14.sp,
-                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        isKeyboardKey = false
                     )
                     NepoButton(
                         text = stringResource(id = R.string.settings_dialog_btn_close),
                         onClick = { showInternetConfirmDialog = false },
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         fontSize = 14.sp,
-                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        isKeyboardKey = false
                     )
                 }
             }
@@ -1526,7 +1581,7 @@ fun NepoUpdateDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     when (val result = updateResult) {
-                        is UpdateResult.NewVersion -> {
+                         is UpdateResult.NewVersion -> {
                             NepoButton(
                                 text = stringResource(id = R.string.settings_dialog_btn_download),
                                 onClick = {
@@ -1537,14 +1592,16 @@ fun NepoUpdateDialog(
                                 },
                                 visualTokens = theme.colors.interactiveComponents.confirmButton,
                                 fontSize = 14.sp,
-                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                isKeyboardKey = false
                             )
                             NepoButton(
                                 text = stringResource(id = R.string.settings_dialog_btn_close),
                                 onClick = onDismissRequest,
                                 visualTokens = theme.colors.interactiveComponents.closeButton,
                                 fontSize = 14.sp,
-                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                isKeyboardKey = false
                             )
                         }
                         is UpdateResult.Error, null -> {
@@ -1553,14 +1610,16 @@ fun NepoUpdateDialog(
                                 onClick = onRetryClick,
                                 visualTokens = theme.colors.interactiveComponents.confirmButton,
                                 fontSize = 14.sp,
-                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                isKeyboardKey = false
                             )
                             NepoButton(
                                 text = stringResource(id = R.string.settings_dialog_btn_close),
                                 onClick = onDismissRequest,
                                 visualTokens = theme.colors.interactiveComponents.closeButton,
                                 fontSize = 14.sp,
-                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                isKeyboardKey = false
                             )
                         }
                         is UpdateResult.UpToDate -> {
@@ -1569,7 +1628,8 @@ fun NepoUpdateDialog(
                                 onClick = onDismissRequest,
                                 visualTokens = theme.colors.interactiveComponents.confirmButton,
                                 fontSize = 14.sp,
-                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                                padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                                isKeyboardKey = false
                             )
                         }
                     }

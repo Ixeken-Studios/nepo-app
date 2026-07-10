@@ -95,7 +95,13 @@
     <string name="settings_btn_back">Back</string>
     <string name="settings_theme_rustic_digital">Rustic digital</string>
     <string name="settings_theme_glassy_premium">Glassy Premium</string>
+    <string name="settings_theme_revolution_hue">Revolution hue</string>
+    <string name="settings_theme_square_grape">Square Grape</string>
+    <string name="settings_theme_yellow_harmony">Yellow harmony</string>
+    <string name="settings_theme_bubble_tea">Bubble tea</string>
+    <string name="settings_theme_monochromatic_elegance">Monochromatic Elegance</string>
     <string name="settings_font_system_default">System default</string>
+    <string name="settings_font_theme_default">Theme default</string>
 
     <!-- Unit Converter Strings -->
     <string name="units_title">Units</string>

@@ -31,12 +31,14 @@ enum class StructureStyleType {
  * @property displayName Human-readable name of the theme.
  * @property iconLibrary The icon library to use with this theme.
  * @property borderRadiusGlobal Global corner radius applied to components in this theme.
+ * @property defaultFontName Default typography font name for this theme (e.g. "DM Mono", "Josefin Sans").
  */
 data class ThemeMetadata(
     val id: String,
     val displayName: String,
     val iconLibrary: IconLibrary,
-    val borderRadiusGlobal: Dp
+    val borderRadiusGlobal: Dp,
+    val defaultFontName: String = "DM Mono"
 )
 
 /**
@@ -68,7 +70,9 @@ data class TypographyColors(
     val bodyPrimary: Color,
     val bodySecondary: Color,
     val screenPrimary: Color,
-    val screenSecondary: Color
+    val screenSecondary: Color,
+    val screenIcons: Color = screenPrimary,
+    val scientificOperators: Color = bodyPrimary
 )
 
 /**
@@ -140,6 +144,26 @@ data class SettingsStyle(
 )
 
 /**
+ * Structural configuration parameters for the calculator screen and layout.
+ */
+data class CalculatorStyle(
+    val visorShowCard: Boolean = true,
+    val visorBorderRadius: Dp = 16.dp,
+    val visorCardBorderRadiusTop: Dp = 16.dp,
+    val visorCardBorderRadiusBottom: Dp = 16.dp,
+    val keyboardShowCard: Boolean = false,
+    val keyboardCardBackground: Color = Color.Transparent,
+    val keyboardCardBorderRadiusTop: Dp = 0.dp,
+    val keyboardCardBorderRadiusBottom: Dp = 0.dp,
+    val buttonShapeType: String = "ROUNDED_RECTANGLE",
+    val buttonBorderRadius: Dp = 16.dp,
+    val outerCardPadding: Dp = 0.dp,
+    val outerCardBorderWidth: Dp = 0.dp,
+    val outerCardBorderColor: Color = Color.Transparent,
+    val outerCardBackground: Color = Color.Transparent
+)
+
+/**
  * Root theme styles containing both metadata, colors and structural look.
  *
  * Represents the final configuration of a dynamic theme.
@@ -148,10 +172,12 @@ data class SettingsStyle(
  * @property colors All functional design colors.
  * @property structureStyle Visual layout style type (e.g. flat vs. glassmorphism).
  * @property settingsStyle Structural look and feel parameters for settings screens.
+ * @property calculatorStyle Structural look and feel parameters for the calculator screen layout.
  */
 data class NepoThemeStyles(
     val metadata: ThemeMetadata,
     val colors: NepoThemeColors,
     val structureStyle: StructureStyleType,
-    val settingsStyle: SettingsStyle = SettingsStyle()
+    val settingsStyle: SettingsStyle = SettingsStyle(),
+    val calculatorStyle: CalculatorStyle = CalculatorStyle()
 )

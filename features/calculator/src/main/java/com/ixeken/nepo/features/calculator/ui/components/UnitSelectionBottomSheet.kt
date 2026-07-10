@@ -132,6 +132,7 @@ fun UnitSelectionBottomSheet(
                     visualTokens = theme.colors.interactiveComponents.closeButton,
                     icon = Lucide.X,
                     iconBold = true,
+                    isKeyboardKey = false,
                     modifier = Modifier.size(36.dp)
                 )
             }

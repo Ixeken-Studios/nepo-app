@@ -3,7 +3,8 @@
     "id": "rustic_digital",
     "display_name": "Rustic Digital",
     "icons_library": "lucide-icons",
-    "border_radius_global": "24px"
+    "border_radius_global": "24px",
+    "default_font_name": "DM Mono"
   },
   "settings_style": {
     "use_cards": true,
@@ -11,6 +12,13 @@
     "show_menu_icons": true,
     "show_dividers": false,
     "show_header_separators": false
+  },
+  "calculator_style": {
+    "visor_show_card": true,
+    "visor_border_radius": "24px",
+    "keyboard_show_card": false,
+    "button_shape_type": "ROUNDED_RECTANGLE",
+    "button_border_radius": "24px"
   },
   "colors": {
     "surfaces": {

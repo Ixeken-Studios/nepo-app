@@ -149,6 +149,7 @@ fun HistoryBottomSheet(
                         visualTokens = editButtonTokens,
                         fontSize = 14.sp,
                         padding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        isKeyboardKey = false,
                         modifier = Modifier
                             .width(72.dp)
                             .height(36.dp)
@@ -161,6 +162,7 @@ fun HistoryBottomSheet(
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
                         iconBold = true,
+                        isKeyboardKey = false,
                         modifier = Modifier
                             .width(36.dp)
                             .height(36.dp)
@@ -176,6 +178,7 @@ fun HistoryBottomSheet(
                         visualTokens = theme.colors.interactiveComponents.doneButton,
                         icon = Lucide.Check,
                         iconBold = true,
+                        isKeyboardKey = false,
                         modifier = Modifier
                             .width(36.dp)
                             .height(36.dp)

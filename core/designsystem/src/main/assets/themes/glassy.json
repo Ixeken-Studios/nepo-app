@@ -3,7 +3,8 @@
     "id": "glassy_premium",
     "displayName": "Glassy Premium",
     "iconLibrary": "LUCIDE_ICONS",
-    "borderRadiusGlobal": 100
+    "borderRadiusGlobal": 100,
+    "defaultFontName": "DM Mono"
   },
   "structureStyle": "GLASSMORPHISM",
   "settingsStyle": {
@@ -12,6 +13,13 @@
     "showMenuIcons": true,
     "showDividers": false,
     "showHeaderSeparators": false
+  },
+  "calculatorStyle": {
+    "visorShowCard": true,
+    "visorBorderRadius": "32px",
+    "keyboardShowCard": false,
+    "buttonShapeType": "ROUNDED_RECTANGLE",
+    "buttonBorderRadius": "100px"
   },
   "colors": {
     "surfaces": {
