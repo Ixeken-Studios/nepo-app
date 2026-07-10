@@ -21,6 +21,11 @@ class SettingsRepository(context: Context) {
         private const val KEY_CALCULATOR_MODE = "active_calculator_mode"
         private const val KEY_SOUND_FEEDBACK = "sound_feedback"
         private const val KEY_HAPTIC_FEEDBACK = "haptic_feedback"
+        private const val KEY_CONVERTER_CATEGORY = "converter_category"
+        private const val KEY_CONVERTER_SOURCE_PREFIX = "converter_source_"
+        private const val KEY_CONVERTER_TARGET_PREFIX = "converter_target_"
+        private const val KEY_CONVERTER_LAYOUT = "converter_layout"
+        private const val KEY_ENABLE_CURRENCY = "enable_currency"
     }
 
     /**
@@ -212,5 +217,103 @@ class SettingsRepository(context: Context) {
      */
     fun setHapticFeedbackEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_HAPTIC_FEEDBACK, enabled).apply()
+    }
+
+    /**
+     * Gets the saved converter category name. Defaults to "LENGTH".
+     */
+    fun getSelectedCategory(): String {
+        return prefs.getString(KEY_CONVERTER_CATEGORY, "LENGTH") ?: "LENGTH"
+    }
+
+    /**
+     * Sets the active converter category name.
+     */
+    fun setSelectedCategory(category: String) {
+        prefs.edit().putString(KEY_CONVERTER_CATEGORY, category).apply()
+    }
+
+    /**
+     * Gets the saved source unit ID for a given category.
+     */
+    fun getSourceUnit(category: String): String {
+        val defaultUnit = when (category) {
+            "LENGTH" -> "LENGTH_M"
+            "WEIGHT" -> "WEIGHT_KG"
+            "ENERGY" -> "ENERGY_J"
+            "DATA" -> "DATA_MB"
+            "VOLUME" -> "VOLUME_L"
+            "AREA" -> "AREA_M2"
+            "SPEED" -> "SPEED_KMH"
+            "TIME" -> "TIME_S"
+            "TEMPERATURE" -> "TEMP_C"
+            "CURRENCY" -> "CURRENCY_USD"
+            else -> "LENGTH_M"
+        }
+        return prefs.getString(KEY_CONVERTER_SOURCE_PREFIX + category, defaultUnit) ?: defaultUnit
+    }
+
+    /**
+     * Sets the active source unit ID for a given category.
+     */
+    fun setSourceUnit(category: String, unitId: String) {
+        prefs.edit().putString(KEY_CONVERTER_SOURCE_PREFIX + category, unitId).apply()
+    }
+
+    /**
+     * Gets the saved target unit ID for a given category.
+     */
+    fun getTargetUnit(category: String): String {
+        val defaultUnit = when (category) {
+            "LENGTH" -> "LENGTH_CM"
+            "WEIGHT" -> "WEIGHT_LB"
+            "ENERGY" -> "ENERGY_CAL"
+            "DATA" -> "DATA_GB"
+            "VOLUME" -> "VOLUME_ML"
+            "AREA" -> "AREA_FT2"
+            "SPEED" -> "SPEED_MPH"
+            "TIME" -> "TIME_MIN"
+            "TEMPERATURE" -> "TEMP_F"
+            "CURRENCY" -> "CURRENCY_MXN"
+            else -> "LENGTH_CM"
+        }
+        return prefs.getString(KEY_CONVERTER_TARGET_PREFIX + category, defaultUnit) ?: defaultUnit
+    }
+
+    /**
+     * Sets the active target unit ID for a given category.
+     */
+    fun setTargetUnit(category: String, unitId: String) {
+        prefs.edit().putString(KEY_CONVERTER_TARGET_PREFIX + category, unitId).apply()
+    }
+
+    /**
+     * Gets the saved unit converter layout style ("OUTSIDE", "INSIDE_SOLID", or "INSIDE_OUTLINE").
+     * Defaults to "OUTSIDE".
+     */
+    fun getConverterLayout(): String {
+        return prefs.getString(KEY_CONVERTER_LAYOUT, "OUTSIDE") ?: "OUTSIDE"
+    }
+
+    /**
+     * Sets the active unit converter layout style.
+     */
+    fun setConverterLayout(layout: String) {
+        prefs.edit().putString(KEY_CONVERTER_LAYOUT, layout).apply()
+    }
+
+    /**
+     * Gets whether the currency converter category is enabled.
+     * Defaults to true.
+     */
+    fun isCurrencyEnabled(): Boolean {
+        return prefs.getBoolean(KEY_ENABLE_CURRENCY, true)
+    }
+
+    /**
+     * Sets whether the currency converter category is enabled.
+     */
+    fun setCurrencyEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_ENABLE_CURRENCY, enabled).apply()
     }
 }

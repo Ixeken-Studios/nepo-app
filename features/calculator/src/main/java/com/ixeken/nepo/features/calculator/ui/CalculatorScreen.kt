@@ -57,6 +57,12 @@ import com.ixeken.nepo.features.calculator.presentation.CalculatorUiState
 import com.ixeken.nepo.features.calculator.presentation.CalculatorViewModel
 import com.ixeken.nepo.features.calculator.ui.components.CalculatorKeyboard
 import com.ixeken.nepo.features.calculator.ui.components.HistoryBottomSheet
+import com.ixeken.nepo.features.calculator.domain.UnitCategory
+import com.ixeken.nepo.features.calculator.domain.ConversionUnit
+import com.ixeken.nepo.features.calculator.domain.ConverterRegistry
+import com.ixeken.nepo.features.calculator.ui.components.UnitSelectorRow
+import com.ixeken.nepo.features.calculator.ui.components.UnitSelectionBottomSheet
+import androidx.compose.ui.text.input.TextFieldValue
 
 
 
@@ -102,10 +108,35 @@ fun CalculatorScreen(
     var showHistorySheet by remember { mutableStateOf(false) }
     var historyEntries by remember { mutableStateOf(emptyList<HistoryEntry>()) }
     var currentMode by remember { mutableStateOf(settingsRepository.getCalculatorMode()) }
+    val converterLayout = remember(themeUpdateTrigger) { settingsRepository.getConverterLayout() }
+    val isCurrencyEnabled = remember(themeUpdateTrigger) { settingsRepository.isCurrencyEnabled() }
 
     // Collect UI state
     val uiState by viewModel.uiState.collectAsState()
     val isDegreeMode by viewModel.isDegreeMode.collectAsState()
+
+    // Converter States
+    var activeCategory by remember { mutableStateOf(UnitCategory.valueOf(settingsRepository.getSelectedCategory())) }
+    var sourceUnit by remember(activeCategory) {
+        mutableStateOf(ConverterRegistry.getUnitById(settingsRepository.getSourceUnit(activeCategory.name))
+            ?: ConverterRegistry.getDefaultSourceUnit(activeCategory))
+    }
+    var targetUnit by remember(activeCategory) {
+        mutableStateOf(ConverterRegistry.getUnitById(settingsRepository.getTargetUnit(activeCategory.name))
+            ?: ConverterRegistry.getDefaultTargetUnit(activeCategory))
+    }
+    
+    LaunchedEffect(isCurrencyEnabled) {
+        if (!isCurrencyEnabled && activeCategory == UnitCategory.CURRENCY) {
+            activeCategory = UnitCategory.LENGTH
+            settingsRepository.setSelectedCategory(UnitCategory.LENGTH.name)
+            sourceUnit = ConverterRegistry.getDefaultSourceUnit(UnitCategory.LENGTH)
+            targetUnit = ConverterRegistry.getDefaultTargetUnit(UnitCategory.LENGTH)
+        }
+        com.ixeken.nepo.features.calculator.domain.CurrencyRatesManager.fetchLatestRates(isCurrencyEnabled)
+    }
+    var showSourceUnitSheet by remember { mutableStateOf(false) }
+    var showTargetUnitSheet by remember { mutableStateOf(false) }
 
     val visorLayoutState = remember(uiState) {
         when (val state = uiState) {
@@ -118,7 +149,7 @@ fun CalculatorScreen(
     // Persist successful calculations to local history
     LaunchedEffect(uiState) {
         val state = uiState
-        if (state is CalculatorUiState.AfterEqual) {
+        if (state is CalculatorUiState.AfterEqual && currentMode != "CONVERTER") {
             val exprText = state.originalExpression.text
             val resultText = state.finalResult
             if (exprText.isNotEmpty() && resultText.isNotEmpty() && resultText != "Error") {
@@ -147,7 +178,7 @@ fun CalculatorScreen(
                         color = theme.colors.surfaces.calculatorScreenBackground,
                         shape = displayShape
                     )
-                    .padding(16.dp)
+                    .padding(if (currentMode == "CONVERTER") 12.dp else 16.dp)
             ) {
                 // Top control row inside the display card
                 Row(
@@ -342,6 +373,63 @@ fun CalculatorScreen(
                                                 }
                                             }
                                         }
+
+                                        HorizontalDivider(
+                                            color = theme.colors.structuralElements.itemSeparator,
+                                            thickness = 0.5.dp,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        )
+
+                                        // Option: Unit converter
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable(
+                                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    currentMode = "CONVERTER"
+                                                    settingsRepository.setCalculatorMode("CONVERTER")
+                                                    showModeMenu = false
+                                                }
+                                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = Lucide.ArrowUpDown,
+                                                    contentDescription = null,
+                                                    tint = theme.colors.typography.headerAccent,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(id = com.ixeken.nepo.core.designsystem.R.string.settings_mode_converter),
+                                                    color = theme.colors.typography.bodyPrimary,
+                                                    fontSize = 14.sp,
+                                                    fontFamily = fontFamily
+                                                )
+                                            }
+                                            if (currentMode == "CONVERTER") {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(24.dp)
+                                                        .clip(CircleShape)
+                                                        .background(theme.colors.interactiveComponents.selectButton.background),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Lucide.Check,
+                                                        contentDescription = "Selected",
+                                                        tint = theme.colors.interactiveComponents.selectButton.foreground,
+                                                        modifier = Modifier.size(14.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -395,121 +483,228 @@ fun CalculatorScreen(
                         Spacer(modifier = Modifier.height(1.dp))
                     }
 
-                    AnimatedContent(
-                        targetState = visorLayoutState,
-                        transitionSpec = {
-                            val isTransitionBetweenTypingAndResult =
-                                (initialState is VisorLayoutState.Result && targetState is VisorLayoutState.Typing) ||
-                                (initialState is VisorLayoutState.Typing && targetState is VisorLayoutState.Result) ||
-                                (initialState is VisorLayoutState.Empty && targetState is VisorLayoutState.Result) ||
-                                (initialState is VisorLayoutState.Result && targetState is VisorLayoutState.Empty)
+                    if (currentMode == "CONVERTER") {
+                        val currentExpr = when (val state = visorLayoutState) {
+                            is VisorLayoutState.Empty -> TextFieldValue("")
+                            is VisorLayoutState.Typing -> state.expression
+                            is VisorLayoutState.Result -> state.originalExpression
+                        }
+                        val isReadOnly = when (visorLayoutState) {
+                            is VisorLayoutState.Result -> true
+                            else -> false
+                        }
+                        val (srcText, destText) = getConverterValues(visorLayoutState, sourceUnit, targetUnit, settingsRepository)
 
-                            val isBetweenEmptyAndTyping =
-                                (initialState is VisorLayoutState.Empty && targetState is VisorLayoutState.Typing) ||
-                                (initialState is VisorLayoutState.Typing && targetState is VisorLayoutState.Empty)
-
-                            if (isTransitionBetweenTypingAndResult) {
-                                val animSpec = androidx.compose.animation.core.tween<Float>(durationMillis = 225)
-                                val intOffsetSpec = androidx.compose.animation.core.tween<androidx.compose.ui.unit.IntOffset>(durationMillis = 225)
-                                (slideInVertically(animationSpec = intOffsetSpec) { height -> height } + fadeIn(animationSpec = animSpec)).togetherWith(
-                                    slideOutVertically(animationSpec = intOffsetSpec) { height -> -height } + fadeOut(animationSpec = animSpec)
-                                )
-                            } else if (isBetweenEmptyAndTyping) {
-                                fadeIn(animationSpec = androidx.compose.animation.core.tween(165)).togetherWith(
-                                    fadeOut(animationSpec = androidx.compose.animation.core.tween(165))
-                                )
-                            } else {
-                                EnterTransition.None togetherWith ExitTransition.None
-                            }
-                        },
-                        label = "visor_transition",
-                        modifier = Modifier.fillMaxWidth()
-                    ) { state ->
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.Bottom,
                             horizontalAlignment = Alignment.End
                         ) {
-                            when (state) {
-                                is VisorLayoutState.Result -> {
-                                    // Top: Operation (original expression) is small (without '=' as shown in mockup)
-                                    AutoResizeTextField(
-                                        value = state.originalExpression,
-                                        onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
-                                        readOnly = true,
-                                        maxFontSize = maxPartialSize,
-                                        minFontSize = 12.sp,
-                                        color = theme.colors.typography.screenSecondary,
-                                        fontFamily = fontFamily,
-                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
-                                        modifier = Modifier.fillMaxWidth()
+                            // Top: Editable / Non-editable Expression
+                            AutoResizeTextField(
+                                value = currentExpr,
+                                onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
+                                readOnly = isReadOnly,
+                                maxFontSize = 15.sp,
+                                minFontSize = 12.sp,
+                                color = if (isReadOnly) theme.colors.typography.screenSecondary else theme.colors.typography.screenPrimary,
+                                fontFamily = fontFamily,
+                                cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            
+                            // Source value
+                            AutoResizeText(
+                                text = srcText.ifEmpty { "0" },
+                                maxFontSize = 26.sp,
+                                minFontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = theme.colors.typography.screenPrimary,
+                                fontFamily = fontFamily,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = stringResource(id = sourceUnit.nameResId).lowercase(),
+                                color = theme.colors.typography.screenPrimary,
+                                fontSize = 11.sp,
+                                fontFamily = fontFamily
+                            )
+                            
+                            HorizontalDivider(
+                                color = theme.colors.structuralElements.itemSeparator,
+                                thickness = 0.5.dp,
+                                modifier = Modifier.padding(vertical = 3.dp)
+                            )
+                            
+                            // Destination value
+                            AutoResizeText(
+                                text = destText.ifEmpty { "0" },
+                                maxFontSize = 38.sp,
+                                minFontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = theme.colors.typography.screenPrimary,
+                                fontFamily = fontFamily,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = stringResource(id = targetUnit.nameResId).lowercase(),
+                                color = theme.colors.typography.screenPrimary,
+                                fontSize = 12.sp,
+                                fontFamily = fontFamily
+                            )
+                        }
+                    } else {
+                        AnimatedContent(
+                            targetState = visorLayoutState,
+                            transitionSpec = {
+                                val isTransitionBetweenTypingAndResult =
+                                    (initialState is VisorLayoutState.Result && targetState is VisorLayoutState.Typing) ||
+                                    (initialState is VisorLayoutState.Typing && targetState is VisorLayoutState.Result) ||
+                                    (initialState is VisorLayoutState.Empty && targetState is VisorLayoutState.Result) ||
+                                    (initialState is VisorLayoutState.Result && targetState is VisorLayoutState.Empty)
+
+                                val isBetweenEmptyAndTyping =
+                                    (initialState is VisorLayoutState.Empty && targetState is VisorLayoutState.Typing) ||
+                                    (initialState is VisorLayoutState.Typing && targetState is VisorLayoutState.Empty)
+
+                                if (isTransitionBetweenTypingAndResult) {
+                                    val animSpec = androidx.compose.animation.core.tween<Float>(durationMillis = 225)
+                                    val intOffsetSpec = androidx.compose.animation.core.tween<androidx.compose.ui.unit.IntOffset>(durationMillis = 225)
+                                    (slideInVertically(animationSpec = intOffsetSpec) { height -> height } + fadeIn(animationSpec = animSpec)).togetherWith(
+                                        slideOutVertically(animationSpec = intOffsetSpec) { height -> -height } + fadeOut(animationSpec = animSpec)
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    // Bottom: Final result (total) is large
-                                    val formattedResult = try {
-                                        settingsRepository.formatNumber(state.finalResult.toDouble())
-                                    } catch (e: Exception) {
-                                        state.finalResult
-                                    }
-                                    AutoResizeText(
-                                        text = formattedResult,
-                                        maxFontSize = maxResultSize,
-                                        minFontSize = 24.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = theme.colors.typography.screenPrimary,
-                                        fontFamily = fontFamily,
-                                        modifier = Modifier.fillMaxWidth()
+                                } else if (isBetweenEmptyAndTyping) {
+                                    fadeIn(animationSpec = androidx.compose.animation.core.tween(165)).togetherWith(
+                                        fadeOut(animationSpec = androidx.compose.animation.core.tween(165))
                                     )
+                                } else {
+                                    EnterTransition.None togetherWith ExitTransition.None
                                 }
-                                is VisorLayoutState.Typing -> {
-                                    // Top: running total (partial result) is small
-                                    val formattedPartial = if (state.partialResult.isNotEmpty()) {
-                                        try {
-                                            settingsRepository.formatNumber(state.partialResult.toDouble())
+                            },
+                            label = "visor_transition",
+                            modifier = Modifier.fillMaxWidth()
+                        ) { state ->
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.Bottom,
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                when (state) {
+                                    is VisorLayoutState.Result -> {
+                                        // Top: Operation (original expression) is small (without '=' as shown in mockup)
+                                        AutoResizeTextField(
+                                            value = state.originalExpression,
+                                            onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
+                                            readOnly = true,
+                                            maxFontSize = maxPartialSize,
+                                            minFontSize = 12.sp,
+                                            color = theme.colors.typography.screenSecondary,
+                                            fontFamily = fontFamily,
+                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        // Bottom: Final result (total) is large
+                                        val formattedResult = try {
+                                            settingsRepository.formatNumber(state.finalResult.toDouble())
                                         } catch (e: Exception) {
-                                            state.partialResult
+                                            state.finalResult
                                         }
-                                    } else {
-                                        ""
+                                        AutoResizeText(
+                                            text = formattedResult,
+                                            maxFontSize = maxResultSize,
+                                            minFontSize = 24.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = theme.colors.typography.screenPrimary,
+                                            fontFamily = fontFamily,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
                                     }
-                                    AutoResizeText(
-                                        text = formattedPartial,
-                                        maxFontSize = maxPartialSize,
-                                        minFontSize = 12.sp,
-                                        color = theme.colors.typography.screenSecondary,
-                                        fontFamily = fontFamily,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    // Bottom: Operation (expression) is large, editable as a text box with cursor
-                                    AutoResizeTextField(
-                                        value = state.expression,
-                                        onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
-                                        readOnly = false,
-                                        maxFontSize = maxExpressionSize,
-                                        minFontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = theme.colors.typography.screenPrimary,
-                                        fontFamily = fontFamily,
-                                        cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-                                is VisorLayoutState.Empty -> {
-                                    // Empty state shows slashed zero 'Ø' aligned top-right
-                                    Text(
-                                        text = "0",
-                                        fontSize = if (isLandscape) 42.sp else 64.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = theme.colors.typography.screenPrimary,
-                                        fontFamily = fontFamily,
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+                                    is VisorLayoutState.Typing -> {
+                                        // Top: running total (partial result) is small
+                                        val formattedPartial = if (state.partialResult.isNotEmpty()) {
+                                            try {
+                                                settingsRepository.formatNumber(state.partialResult.toDouble())
+                                            } catch (e: Exception) {
+                                                state.partialResult
+                                            }
+                                        } else {
+                                            ""
+                                        }
+                                        AutoResizeText(
+                                            text = formattedPartial,
+                                            maxFontSize = maxPartialSize,
+                                            minFontSize = 12.sp,
+                                            color = theme.colors.typography.screenSecondary,
+                                            fontFamily = fontFamily,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        // Bottom: Operation (expression) is large, editable as a text box with cursor
+                                        AutoResizeTextField(
+                                            value = state.expression,
+                                            onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
+                                            readOnly = false,
+                                            maxFontSize = maxExpressionSize,
+                                            minFontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = theme.colors.typography.screenPrimary,
+                                            fontFamily = fontFamily,
+                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                    is VisorLayoutState.Empty -> {
+                                        // Empty state shows slashed zero 'Ø' aligned top-right
+                                        Text(
+                                            text = "0",
+                                            fontSize = if (isLandscape) 42.sp else 64.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = theme.colors.typography.screenPrimary,
+                                            fontFamily = fontFamily,
+                                            textAlign = TextAlign.End,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
+                }
+                
+                if (currentMode == "CONVERTER" && activeCategory == UnitCategory.CURRENCY) {
+                    val statusText = if (com.ixeken.nepo.features.calculator.domain.CurrencyRatesManager.ratesDate == "offline") {
+                        stringResource(id = R.string.currency_rates_offline)
+                    } else {
+                        com.ixeken.nepo.features.calculator.domain.CurrencyRatesManager.ratesDate
+                    }
+                    Text(
+                        text = stringResource(id = R.string.currency_rates_status, statusText),
+                        color = theme.colors.typography.screenSecondary,
+                        fontSize = 11.sp,
+                        fontFamily = fontFamily,
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        textAlign = TextAlign.End
+                    )
+                }
+
+                if (currentMode == "CONVERTER" && converterLayout != "OUTSIDE") {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    UnitSelectorRow(
+                        sourceUnit = sourceUnit,
+                        targetUnit = targetUnit,
+                        onSourceClick = { showSourceUnitSheet = true },
+                        onTargetClick = { showTargetUnitSheet = true },
+                        onSwapClick = {
+                            val temp = sourceUnit
+                            sourceUnit = targetUnit
+                            targetUnit = temp
+                            settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                            settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                        },
+                        layout = converterLayout
+                    )
                 }
             }
         }
@@ -547,11 +742,47 @@ fun CalculatorScreen(
                 ) {
                     val visorWeight = if (currentMode == "SCIENTIFIC") 0.35f else 0.45f
                     val keyboardWeight = if (currentMode == "SCIENTIFIC") 0.65f else 0.55f
-                    displayCard(Modifier.weight(visorWeight).fillMaxHeight())
+                    Column(
+                        modifier = Modifier.weight(visorWeight).fillMaxHeight()
+                    ) {
+                        displayCard(Modifier.weight(1f).fillMaxWidth())
+                        if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            UnitSelectorRow(
+                                sourceUnit = sourceUnit,
+                                targetUnit = targetUnit,
+                                onSourceClick = { showSourceUnitSheet = true },
+                                onTargetClick = { showTargetUnitSheet = true },
+                                onSwapClick = {
+                                    val temp = sourceUnit
+                                    sourceUnit = targetUnit
+                                    targetUnit = temp
+                                    settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                    settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                                }
+                            )
+                        }
+                    }
                     keyboardContent(Modifier.weight(keyboardWeight).fillMaxHeight())
                 }
             } else {
                 displayCard(Modifier.fillMaxWidth().weight(1.0f))
+                if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    UnitSelectorRow(
+                        sourceUnit = sourceUnit,
+                        targetUnit = targetUnit,
+                        onSourceClick = { showSourceUnitSheet = true },
+                        onTargetClick = { showTargetUnitSheet = true },
+                        onSwapClick = {
+                            val temp = sourceUnit
+                            sourceUnit = targetUnit
+                            targetUnit = temp
+                            settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                            settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                        }
+                    )
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 keyboardContent(Modifier.fillMaxWidth())
             }
@@ -585,7 +816,63 @@ fun CalculatorScreen(
                 )
             }
 
+            // Source Unit selection bottom sheet
+            if (showSourceUnitSheet) {
+                UnitSelectionBottomSheet(
+                    title = stringResource(id = R.string.units_from),
+                    selectedUnit = sourceUnit,
+                    currentCategory = activeCategory,
+                    onUnitSelected = { unit ->
+                        if (unit.category != activeCategory) {
+                            activeCategory = unit.category
+                            settingsRepository.setSelectedCategory(unit.category.name)
+                            targetUnit = ConverterRegistry.getUnitById(settingsRepository.getTargetUnit(unit.category.name))
+                                ?: ConverterRegistry.getDefaultTargetUnit(unit.category)
+                        }
+                        sourceUnit = unit
+                        settingsRepository.setSourceUnit(activeCategory.name, unit.id)
+                    },
+                    onCategorySelected = { category ->
+                        activeCategory = category
+                        settingsRepository.setSelectedCategory(category.name)
+                        sourceUnit = ConverterRegistry.getUnitById(settingsRepository.getSourceUnit(category.name))
+                            ?: ConverterRegistry.getDefaultSourceUnit(category)
+                        targetUnit = ConverterRegistry.getUnitById(settingsRepository.getTargetUnit(category.name))
+                            ?: ConverterRegistry.getDefaultTargetUnit(category)
+                    },
+                    onDismissRequest = { showSourceUnitSheet = false },
+                    isCurrencyEnabled = isCurrencyEnabled
+                )
+            }
 
+            // Target Unit selection bottom sheet
+            if (showTargetUnitSheet) {
+                UnitSelectionBottomSheet(
+                    title = stringResource(id = R.string.units_to),
+                    selectedUnit = targetUnit,
+                    currentCategory = activeCategory,
+                    onUnitSelected = { unit ->
+                        if (unit.category != activeCategory) {
+                            activeCategory = unit.category
+                            settingsRepository.setSelectedCategory(unit.category.name)
+                            sourceUnit = ConverterRegistry.getUnitById(settingsRepository.getSourceUnit(unit.category.name))
+                                ?: ConverterRegistry.getDefaultSourceUnit(unit.category)
+                        }
+                        targetUnit = unit
+                        settingsRepository.setTargetUnit(activeCategory.name, unit.id)
+                    },
+                    onCategorySelected = { category ->
+                        activeCategory = category
+                        settingsRepository.setSelectedCategory(category.name)
+                        sourceUnit = ConverterRegistry.getUnitById(settingsRepository.getSourceUnit(category.name))
+                            ?: ConverterRegistry.getDefaultSourceUnit(category)
+                        targetUnit = ConverterRegistry.getUnitById(settingsRepository.getTargetUnit(category.name))
+                            ?: ConverterRegistry.getDefaultTargetUnit(category)
+                    },
+                    onDismissRequest = { showTargetUnitSheet = false },
+                    isCurrencyEnabled = isCurrencyEnabled
+                )
+            }
         }
     }
 
@@ -699,4 +986,52 @@ sealed interface VisorLayoutState {
         val originalExpression: androidx.compose.ui.text.input.TextFieldValue,
         val finalResult: String
     ) : VisorLayoutState
+}
+
+@Composable
+private fun getConverterValues(
+    state: VisorLayoutState,
+    sourceUnit: ConversionUnit,
+    targetUnit: ConversionUnit,
+    settingsRepository: SettingsRepository
+): Pair<String, String> {
+    val sourceValStr = when (state) {
+        is VisorLayoutState.Empty -> "0"
+        is VisorLayoutState.Typing -> {
+            if (state.partialResult.isNotEmpty()) {
+                state.partialResult
+            } else {
+                val raw = state.expression.text
+                if (raw.toDoubleOrNull() != null) raw else ""
+            }
+        }
+        is VisorLayoutState.Result -> {
+            if (state.finalResult == "Error") "" else state.finalResult
+        }
+    }
+    
+    if (sourceValStr.isEmpty()) {
+        return Pair("", "")
+    }
+    
+    val sourceDouble = sourceValStr.toDoubleOrNull()
+    if (sourceDouble == null) {
+        return Pair(sourceValStr, "")
+    }
+    
+    val convertedDouble = ConverterRegistry.convert(sourceDouble, sourceUnit, targetUnit)
+    
+    val formattedSource = try {
+        settingsRepository.formatNumber(sourceDouble)
+    } catch (e: Exception) {
+        sourceValStr
+    }
+    
+    val formattedTarget = try {
+        settingsRepository.formatNumber(convertedDouble)
+    } catch (e: Exception) {
+        convertedDouble.toString()
+    }
+    
+    return Pair(formattedSource, formattedTarget)
 }

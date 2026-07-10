@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.Velocity
 import androidx.activity.compose.BackHandler
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
+import kotlinx.coroutines.launch
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -137,6 +138,9 @@ fun SettingsScreen(
                 }
                 composable("about") {
                     AboutScreen(navController, settingsRepository)
+                }
+                composable("converter") {
+                    ConverterSettingsScreen(navController, settingsRepository)
                 }
             }
         }
@@ -376,6 +380,13 @@ private fun SettingsRootScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         SettingsHeader(breadcrumbParent = null, activeNode = stringResource(id = R.string.settings_nav_root), onBackClick = onClose, isRoot = true)
         Spacer(modifier = Modifier.height(8.dp))
+        SettingsSectionHeader(stringResource(id = R.string.settings_section_general))
+        SettingsCard {
+            MenuItem(title = stringResource(id = R.string.settings_option_converter), icon = Lucide.ArrowLeftRight, isLast = true) {
+                navController.navigate("converter")
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         SettingsSectionHeader(stringResource(id = R.string.settings_section_preferences))
         SettingsCard {
             MenuItem(title = stringResource(id = R.string.settings_option_appearance), icon = Lucide.Palette) {
@@ -456,6 +467,19 @@ private fun SettingsBottomSheet(
 ) {
     val theme = LocalNepoTheme.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    val animateDismiss = {
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismissRequest()
+            }
+        }
+        Unit
+    }
+
     val blockNestedScroll = remember {
         object : NestedScrollConnection {
             override fun onPostScroll(
@@ -509,7 +533,7 @@ private fun SettingsBottomSheet(
                     )
                     NepoButton(
                         text = stringResource(id = R.string.settings_dialog_btn_close),
-                        onClick = onDismissRequest,
+                        onClick = animateDismiss,
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
                         iconBold = true,
@@ -537,6 +561,8 @@ private fun AppearanceScreen(
     settingsRepository: SettingsRepository,
     onThemeChanged: () -> Unit
 ) {
+    val theme = LocalNepoTheme.current
+    val fontFamily = LocalNepoFontFamily.current
     var showThemesSheet by remember { mutableStateOf(false) }
     var showFontsSheet by remember { mutableStateOf(false) }
 
@@ -547,39 +573,46 @@ private fun AppearanceScreen(
             onBackClick = { navController.popBackStack() }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_appearance))
-        SettingsCard {
-            MenuItem(title = stringResource(id = R.string.settings_option_themes), icon = Lucide.Sparkles) {
-                showThemesSheet = true
-            }
-            MenuItem(title = stringResource(id = R.string.settings_option_fonts), icon = Lucide.Type, isLast = true) {
-                showFontsSheet = true
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_keyboard_feedback))
-        var isSoundEnabled by remember { mutableStateOf(settingsRepository.isSoundFeedbackEnabled()) }
-        var isHapticEnabled by remember { mutableStateOf(settingsRepository.isHapticFeedbackEnabled()) }
-        SettingsCard {
-            ToggleMenuItem(
-                title = stringResource(id = R.string.settings_option_sound_feedback),
-                description = stringResource(id = R.string.settings_desc_sound_feedback),
-                checked = isSoundEnabled,
-                onCheckedChange = { isChecked ->
-                    isSoundEnabled = isChecked
-                    settingsRepository.setSoundFeedbackEnabled(isChecked)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_appearance))
+            SettingsCard {
+                MenuItem(title = stringResource(id = R.string.settings_option_themes), icon = Lucide.Sparkles) {
+                    showThemesSheet = true
                 }
-            )
-            ToggleMenuItem(
-                title = stringResource(id = R.string.settings_option_haptic_feedback),
-                description = stringResource(id = R.string.settings_desc_haptic_feedback),
-                checked = isHapticEnabled,
-                isLast = true,
-                onCheckedChange = { isChecked ->
-                    isHapticEnabled = isChecked
-                    settingsRepository.setHapticFeedbackEnabled(isChecked)
+                MenuItem(title = stringResource(id = R.string.settings_option_fonts), icon = Lucide.Type, isLast = true) {
+                    showFontsSheet = true
                 }
-            )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_keyboard_feedback))
+            var isSoundEnabled by remember { mutableStateOf(settingsRepository.isSoundFeedbackEnabled()) }
+            var isHapticEnabled by remember { mutableStateOf(settingsRepository.isHapticFeedbackEnabled()) }
+            SettingsCard {
+                ToggleMenuItem(
+                    title = stringResource(id = R.string.settings_option_sound_feedback),
+                    description = stringResource(id = R.string.settings_desc_sound_feedback),
+                    checked = isSoundEnabled,
+                    onCheckedChange = { isChecked ->
+                        isSoundEnabled = isChecked
+                        settingsRepository.setSoundFeedbackEnabled(isChecked)
+                    }
+                )
+                ToggleMenuItem(
+                    title = stringResource(id = R.string.settings_option_haptic_feedback),
+                    description = stringResource(id = R.string.settings_desc_haptic_feedback),
+                    checked = isHapticEnabled,
+                    isLast = true,
+                    onCheckedChange = { isChecked ->
+                        isHapticEnabled = isChecked
+                        settingsRepository.setHapticFeedbackEnabled(isChecked)
+                    }
+                )
+            }
         }
     }
 
@@ -934,6 +967,7 @@ private fun AboutScreen(
     var showUpdateDialog by remember { mutableStateOf(false) }
     var checkingUpdates by remember { mutableStateOf(false) }
     var updateResult by remember { mutableStateOf<UpdateResult?>(null) }
+    var showInternetConfirmDialog by remember { mutableStateOf(false) }
     
     var checkOnStart by remember { mutableStateOf(settingsRepository.isCheckUpdateOnStartEnabled()) }
 
@@ -971,13 +1005,7 @@ private fun AboutScreen(
                 title = stringResource(id = R.string.settings_option_check_updates),
                 icon = Lucide.RefreshCw,
                 onClick = {
-                    checkingUpdates = true
-                    showUpdateDialog = true
-                    updateResult = null
-                    coroutineScope.launch {
-                        updateResult = checkGitHubUpdate(context)
-                        checkingUpdates = false
-                    }
+                    showInternetConfirmDialog = true
                 }
             )
             
@@ -1033,6 +1061,60 @@ private fun AboutScreen(
                 }
             }
         }
+    }
+
+    if (showInternetConfirmDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showInternetConfirmDialog = false },
+            containerColor = theme.colors.surfaces.bottomSheetBackground,
+            title = {
+                Text(
+                    text = stringResource(id = R.string.settings_dialog_internet_confirm_title),
+                    color = theme.colors.typography.bodyPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = fontFamily
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(id = R.string.settings_dialog_internet_confirm_desc),
+                    color = theme.colors.typography.bodySecondary,
+                    fontSize = 14.sp,
+                    fontFamily = fontFamily
+                )
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NepoButton(
+                        text = stringResource(id = R.string.settings_dialog_internet_btn_proceed),
+                        onClick = {
+                            showInternetConfirmDialog = false
+                            checkingUpdates = true
+                            showUpdateDialog = true
+                            updateResult = null
+                            coroutineScope.launch {
+                                updateResult = checkGitHubUpdate(context)
+                                checkingUpdates = false
+                            }
+                        },
+                        visualTokens = theme.colors.interactiveComponents.confirmButton,
+                        fontSize = 14.sp,
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                    NepoButton(
+                        text = stringResource(id = R.string.settings_dialog_btn_close),
+                        onClick = { showInternetConfirmDialog = false },
+                        visualTokens = theme.colors.interactiveComponents.closeButton,
+                        fontSize = 14.sp,
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
+        )
     }
 
     NepoUpdateDialog(
@@ -1495,4 +1577,118 @@ fun NepoUpdateDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ConverterSettingsScreen(
+    navController: NavController,
+    settingsRepository: SettingsRepository
+) {
+    val theme = LocalNepoTheme.current
+    val fontFamily = LocalNepoFontFamily.current
+    var isCurrencyEnabled by remember { mutableStateOf(settingsRepository.isCurrencyEnabled()) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        SettingsHeader(
+            breadcrumbParent = stringResource(id = R.string.settings_nav_root),
+            activeNode = stringResource(id = R.string.settings_option_converter),
+            onBackClick = { navController.popBackStack() }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_general))
+            SettingsCard {
+                ToggleMenuItem(
+                    title = stringResource(id = R.string.settings_option_enable_currency),
+                    description = stringResource(id = R.string.settings_desc_enable_currency),
+                    checked = isCurrencyEnabled,
+                    isLast = true,
+                    onCheckedChange = { isChecked ->
+                        isCurrencyEnabled = isChecked
+                        settingsRepository.setCurrencyEnabled(isChecked)
+                    }
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_converter_layout))
+            var selectedLayout by remember { mutableStateOf(settingsRepository.getConverterLayout()) }
+            val isGlass = theme.structureStyle == com.ixeken.nepo.core.designsystem.models.StructureStyleType.GLASSMORPHISM
+            val unselectedBg = theme.colors.surfaces.appBackground
+            val unselectedText = theme.colors.typography.headerAccent
+            val selectedBg = if (isGlass) Color.White else theme.colors.surfaces.calculatorScreenBackground
+            val selectedText = if (isGlass) Color(0xFF0F1016) else theme.colors.interactiveComponents.numbersButton.background
+
+            SettingsCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.settings_label_converter_layout),
+                        color = theme.colors.typography.bodyPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = fontFamily
+                    )
+                    Text(
+                        text = stringResource(id = R.string.settings_desc_converter_layout),
+                        color = theme.colors.typography.bodySecondary,
+                        fontSize = 12.sp,
+                        fontFamily = fontFamily,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val layoutOptions = listOf(
+                            "OUTSIDE" to stringResource(id = R.string.settings_converter_layout_outside),
+                            "INSIDE_SOLID" to stringResource(id = R.string.settings_converter_layout_inside_solid),
+                            "INSIDE_OUTLINE" to stringResource(id = R.string.settings_converter_layout_inside_outline)
+                        )
+
+                        layoutOptions.forEach { (key, label) ->
+                            val isSelected = selectedLayout == key
+                            val bg = if (isSelected) selectedBg else unselectedBg
+                            val textCol = if (isSelected) selectedText else unselectedText
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(CircleShape)
+                                    .background(bg)
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        selectedLayout = key
+                                        settingsRepository.setConverterLayout(key)
+                                    }
+                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = textCol,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = fontFamily,
+                                    textAlign = TextAlign.Center,
+                                    maxLines = 2,
+                                    minLines = 2
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

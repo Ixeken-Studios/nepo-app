@@ -37,7 +37,7 @@
     <!-- About Screen & Updates -->
     <string name="settings_section_about">About</string>
     <string name="app_name_about">Nepo</string>
-    <string name="app_version_about">v1.0.0</string>
+    <string name="app_version_about">v1.1.0</string>
     <string name="settings_section_info_updates">Information &amp; Updates</string>
     <string name="settings_option_view_changelog">View changelog</string>
     <string name="settings_option_check_updates">Check for updates</string>
@@ -53,15 +53,18 @@
     <string name="settings_dialog_btn_ok">OK</string>
     <string name="settings_dialog_btn_download">Download</string>
     <string name="settings_dialog_btn_retry">Retry</string>
+    <string name="settings_dialog_internet_confirm_title">Internet Connection Required</string>
+    <string name="settings_dialog_internet_confirm_desc">This option requires an active internet connection to contact GitHub and check for updates. Do you want to proceed?</string>
+    <string name="settings_dialog_internet_btn_proceed">Proceed</string>
     
     <string name="settings_sheet_changelog">Changelog</string>
     <string name="settings_sheet_version_history">Version history</string>
-    <string name="settings_sheet_version_latest">Version 1.0.0 (Latest)</string>
+    <string name="settings_sheet_version_latest">Version 1.1.0 (Latest)</string>
     
-    <string name="changelog_point_1">• Scientific mathematical engine supporting basic operators.</string>
-    <string name="changelog_point_3">• Real-time interactive calculation history with multi-selection delete and bulk clear support.</string>
-    <string name="changelog_point_4">• Premium style customization with dynamic themes and Google Fonts integration.</string>
-    <string name="changelog_point_5">• Customizable number formatting including decimal precision settings and thousands separator preference.</string>
+    <string name="changelog_point_1">• Added Unit &amp; Currency converter supporting 10 different categories.</string>
+    <string name="changelog_point_3">• Quality of life enhancements including layout customization, new settings categories and improvements to the update checker.</string>
+    <string name="changelog_point_4">• Improved transparency regarding internet usage with explicit confirmation dialogs before making network requests.</string>
+    <string name="changelog_point_5">• Offline currency rates fallback support to prevent unnecessary network connections.</string>
 
     <!-- Keyboard Feedback -->
     <string name="settings_section_keyboard_feedback">Keyboard Feedback</string>
@@ -74,7 +77,7 @@
     <string name="settings_option_privacy_notice">Privacy notice</string>
     <string name="settings_sheet_privacy_title">Privacy Notice</string>
     <string name="settings_privacy_paragraph_1">Ixeken Studios does not collect any usage data, personal analytics, or application activity. Nepo operates fully offline and is completely ad-free to respect your privacy.</string>
-    <string name="settings_privacy_paragraph_2">Network access is strictly limited and is only initialized when you manually trigger update checks or when the automatic update validation on startup is enabled.</string>
+    <string name="settings_privacy_paragraph_2">Network access is strictly limited and is only initialized when you manually trigger update checks, when the automatic update validation is enabled, or to download the latest exchange rates for the currency converter (which can be disabled entirely in settings to prevent any network activity).</string>
 
     <!-- Credits -->
     <string name="settings_option_created_by">Created by Ixeken Studios</string>
@@ -93,4 +96,219 @@
     <string name="settings_theme_rustic_digital">Rustic digital</string>
     <string name="settings_theme_glassy_premium">Glassy Premium</string>
     <string name="settings_font_system_default">System default</string>
+
+    <!-- Unit Converter Strings -->
+    <string name="units_title">Units</string>
+    <string name="units_from">From</string>
+    <string name="units_to">To</string>
+    <string name="search_unit_placeholder">Search unit</string>
+    <string name="search_unit_no_results">No units found with that name</string>
+
+    <!-- Unit Converter Layout Settings -->
+    <string name="settings_section_converter_layout">Conversor Layout</string>
+    <string name="settings_label_converter_layout">Unit converter position</string>
+    <string name="settings_desc_converter_layout">Choose the visual style and layout position for the unit converter buttons.</string>
+    <string name="settings_converter_layout_outside">Outside\nvisor</string>
+    <string name="settings_converter_layout_inside_solid">Inside\nsolid</string>
+    <string name="settings_converter_layout_inside_outline">Inside\noutline</string>
+
+    <!-- Unit Converter Settings -->
+    <string name="settings_section_general">General</string>
+    <string name="settings_option_converter">Unit converter</string>
+    <string name="settings_option_enable_currency">Enable currency converter</string>
+    <string name="settings_desc_enable_currency">Allow downloading daily exchange rates from the internet.</string>
+    <string name="currency_rates_status">Rates: %1$s</string>
+    <string name="currency_rates_offline">offline</string>
+
+    <!-- Categories -->
+    <string name="category_length">Length</string>
+    <string name="category_weight">Weight</string>
+    <string name="category_energy">Energy</string>
+    <string name="category_data">Data</string>
+    <string name="category_volume">Volume</string>
+    <string name="category_area">Area</string>
+    <string name="category_speed">Speed</string>
+    <string name="category_time">Time</string>
+    <string name="category_temperature">Temperature</string>
+    <string name="category_currency">Currencies</string>
+
+    <!-- Length Units -->
+    <string name="unit_millimeters">Millimeters</string>
+    <string name="unit_millimeters_abbr">mm</string>
+    <string name="unit_centimeters">Centimeters</string>
+    <string name="unit_centimeters_abbr">cm</string>
+    <string name="unit_meters">Meters</string>
+    <string name="unit_meters_abbr">m</string>
+    <string name="unit_kilometers">Kilometers</string>
+    <string name="unit_kilometers_abbr">km</string>
+    <string name="unit_inches">Inches</string>
+    <string name="unit_inches_abbr">in</string>
+    <string name="unit_feet">Feet</string>
+    <string name="unit_feet_abbr">ft</string>
+    <string name="unit_yards">Yards</string>
+    <string name="unit_yards_abbr">yd</string>
+    <string name="unit_miles">Miles</string>
+    <string name="unit_miles_abbr">mi</string>
+    <string name="unit_parsecs">Parsecs</string>
+    <string name="unit_parsecs_abbr">pc</string>
+
+    <!-- Weight Units -->
+    <string name="unit_milligrams">Milligrams</string>
+    <string name="unit_milligrams_abbr">mg</string>
+    <string name="unit_grams">Grams</string>
+    <string name="unit_grams_abbr">g</string>
+    <string name="unit_kilograms">Kilograms</string>
+    <string name="unit_kilograms_abbr">kg</string>
+    <string name="unit_pounds">Pounds</string>
+    <string name="unit_pounds_abbr">lb</string>
+    <string name="unit_ounces">Ounces</string>
+    <string name="unit_ounces_abbr">oz</string>
+
+    <!-- Energy Units -->
+    <string name="unit_joules">Joules</string>
+    <string name="unit_joules_abbr">J</string>
+    <string name="unit_kilojoules">Kilojoules</string>
+    <string name="unit_kilojoules_abbr">kJ</string>
+    <string name="unit_calories">Calories</string>
+    <string name="unit_calories_abbr">cal</string>
+    <string name="unit_kilocalories">Kilocalories</string>
+    <string name="unit_kilocalories_abbr">kcal</string>
+    <string name="unit_watthours">Watt-hours</string>
+    <string name="unit_watthours_abbr">Wh</string>
+    <string name="unit_kilowatthours">Kilowatt-hours</string>
+    <string name="unit_kilowatthours_abbr">kWh</string>
+
+    <!-- Data Units -->
+    <string name="unit_bytes">Bytes</string>
+    <string name="unit_bytes_abbr">B</string>
+    <string name="unit_kilobytes">Kilobytes</string>
+    <string name="unit_kilobytes_abbr">KB</string>
+    <string name="unit_megabytes">Megabytes</string>
+    <string name="unit_megabytes_abbr">MB</string>
+    <string name="unit_gigabytes">Gigabytes</string>
+    <string name="unit_gigabytes_abbr">GB</string>
+    <string name="unit_terabytes">Terabytes</string>
+    <string name="unit_terabytes_abbr">TB</string>
+
+    <!-- Volume Units -->
+    <string name="unit_milliliters">Milliliters</string>
+    <string name="unit_milliliters_abbr">mL</string>
+    <string name="unit_liters">Liters</string>
+    <string name="unit_liters_abbr">L</string>
+    <string name="unit_cubic_meters">Cubic meters</string>
+    <string name="unit_cubic_meters_abbr">m³</string>
+    <string name="unit_fluid_ounces">Fluid ounces</string>
+    <string name="unit_fluid_ounces_abbr">fl oz</string>
+    <string name="unit_cups">Cups</string>
+    <string name="unit_cups_abbr">cup</string>
+    <string name="unit_pints">Pints</string>
+    <string name="unit_pints_abbr">pt</string>
+    <string name="unit_quarts">Quarts</string>
+    <string name="unit_quarts_abbr">qt</string>
+    <string name="unit_gallons">Gallons</string>
+    <string name="unit_gallons_abbr">gal</string>
+    <string name="unit_teaspoons">Teaspoons</string>
+    <string name="unit_teaspoons_abbr">tsp</string>
+    <string name="unit_tablespoons">Tablespoons</string>
+    <string name="unit_tablespoons_abbr">tbsp</string>
+    <string name="unit_cubic_feet">Cubic feet</string>
+    <string name="unit_cubic_feet_abbr">ft³</string>
+
+    <!-- Area Units -->
+    <string name="unit_square_millimeters">Square millimeters</string>
+    <string name="unit_square_millimeters_abbr">mm²</string>
+    <string name="unit_square_centimeters">Square centimeters</string>
+    <string name="unit_square_centimeters_abbr">cm²</string>
+    <string name="unit_square_meters">Square meters</string>
+    <string name="unit_square_meters_abbr">m²</string>
+    <string name="unit_square_kilometers">Square kilometers</string>
+    <string name="unit_square_kilometers_abbr">km²</string>
+    <string name="unit_square_inches">Square inches</string>
+    <string name="unit_square_inches_abbr">in²</string>
+    <string name="unit_square_feet">Square feet</string>
+    <string name="unit_square_feet_abbr">ft²</string>
+    <string name="unit_square_yards">Square yards</string>
+    <string name="unit_square_yards_abbr">yd²</string>
+    <string name="unit_acres">Acres</string>
+    <string name="unit_acres_abbr">ac</string>
+    <string name="unit_hectares">Hectares</string>
+    <string name="unit_hectares_abbr">ha</string>
+
+    <!-- Speed Units -->
+    <string name="unit_mps">Meters per second</string>
+    <string name="unit_mps_abbr">m/s</string>
+    <string name="unit_kmh">Kilometers per hour</string>
+    <string name="unit_kmh_abbr">km/h</string>
+    <string name="unit_mph">Miles per hour</string>
+    <string name="unit_mph_abbr">mph</string>
+    <string name="unit_fps">Feet per second</string>
+    <string name="unit_fps_abbr">ft/s</string>
+    <string name="unit_knots">Knots</string>
+    <string name="unit_knots_abbr">kt</string>
+
+    <!-- Time Units -->
+    <string name="unit_milliseconds">Milliseconds</string>
+    <string name="unit_milliseconds_abbr">ms</string>
+    <string name="unit_seconds">Seconds</string>
+    <string name="unit_seconds_abbr">s</string>
+    <string name="unit_minutes">Minutes</string>
+    <string name="unit_minutes_abbr">min</string>
+    <string name="unit_hours">Hours</string>
+    <string name="unit_hours_abbr">h</string>
+    <string name="unit_days">Days</string>
+    <string name="unit_days_abbr">d</string>
+    <string name="unit_weeks">Weeks</string>
+    <string name="unit_weeks_abbr">wk</string>
+    <string name="unit_years">Years</string>
+    <string name="unit_years_abbr">yr</string>
+
+    <!-- Temperature Units -->
+    <string name="unit_celsius">Celsius</string>
+    <string name="unit_celsius_abbr">°C</string>
+    <string name="unit_fahrenheit">Fahrenheit</string>
+    <string name="unit_fahrenheit_abbr">°F</string>
+    <string name="unit_kelvin">Kelvin</string>
+    <string name="unit_kelvin_abbr">K</string>
+
+    <!-- Currency Units -->
+    <string name="unit_usd">US Dollar</string>
+    <string name="unit_usd_abbr">USD</string>
+    <string name="unit_eur">Euro</string>
+    <string name="unit_eur_abbr">EUR</string>
+    <string name="unit_mxn">Mexican Peso</string>
+    <string name="unit_mxn_abbr">MXN</string>
+    <string name="unit_ars">Argentine Peso</string>
+    <string name="unit_ars_abbr">ARS</string>
+    <string name="unit_clp">Chilean Peso</string>
+    <string name="unit_clp_abbr">CLP</string>
+    <string name="unit_cop">Colombian Peso</string>
+    <string name="unit_cop_abbr">COP</string>
+    <string name="unit_pen">Peruvian Sol</string>
+    <string name="unit_pen_abbr">PEN</string>
+    <string name="unit_brl">Brazilian Real</string>
+    <string name="unit_brl_abbr">BRL</string>
+    <string name="unit_uyu">Uruguayan Peso</string>
+    <string name="unit_uyu_abbr">UYU</string>
+    <string name="unit_crc">Costa Rican Colón</string>
+    <string name="unit_crc_abbr">CRC</string>
+    <string name="unit_bob">Bolivian Boliviano</string>
+    <string name="unit_bob_abbr">BOB</string>
+    <string name="unit_dop">Dominican Peso</string>
+    <string name="unit_dop_abbr">DOP</string>
+    <string name="unit_gtq">Guatemalan Quetzal</string>
+    <string name="unit_gtq_abbr">GTQ</string>
+    <string name="unit_gbp">British Pound</string>
+    <string name="unit_gbp_abbr">GBP</string>
+    <string name="unit_jpy">Japanese Yen</string>
+    <string name="unit_jpy_abbr">JPY</string>
+    <string name="unit_cad">Canadian Dollar</string>
+    <string name="unit_cad_abbr">CAD</string>
+    <string name="unit_cny">Chinese Yuan</string>
+    <string name="unit_cny_abbr">CNY</string>
+    <string name="unit_rub">Russian Ruble</string>
+    <string name="unit_rub_abbr">RUB</string>
+    <string name="unit_kpw">North Korean Won</string>
+    <string name="unit_kpw_abbr">KPW</string>
+    <string name="unit_irr">Iranian Rial</string>
+    <string name="unit_irr_abbr">IRR</string>
 </resources>

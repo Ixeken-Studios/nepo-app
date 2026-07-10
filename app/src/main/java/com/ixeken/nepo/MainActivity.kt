@@ -27,7 +27,6 @@ import com.ixeken.nepo.features.calculator.ui.SettingsScreen
 import com.ixeken.nepo.features.calculator.ui.checkGitHubUpdate
 import com.ixeken.nepo.features.calculator.ui.UpdateResult
 import com.ixeken.nepo.features.calculator.ui.NepoUpdateDialog
-import com.ixeken.nepo.features.converter.ui.ConverterScreen
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
@@ -189,7 +188,7 @@ class MainActivity : ComponentActivity() {
                             CalculatorScreen(
                                 viewModel = calcViewModel,
                                 onNavigateToSettings = { currentScreen = AppScreen.SETTINGS },
-                                onNavigateToConverter = { currentScreen = AppScreen.CONVERTER },
+                                onNavigateToConverter = {},
                                 modifier = Modifier.fillMaxSize()
                             )
                         }

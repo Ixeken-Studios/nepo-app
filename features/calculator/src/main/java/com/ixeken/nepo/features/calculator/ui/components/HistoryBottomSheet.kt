@@ -39,6 +39,7 @@ import com.ixeken.nepo.features.calculator.data.SettingsRepository
 import com.ixeken.nepo.features.calculator.R
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
 
 /**
  * Bottom Sheet displaying calculation history.
@@ -65,6 +66,18 @@ fun HistoryBottomSheet(
     val theme = LocalNepoTheme.current
     val fontFamily = LocalNepoFontFamily.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    val animateDismiss = {
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            if (!sheetState.isVisible) {
+                onDismissRequest()
+            }
+        }
+        Unit
+    }
     
     val blockNestedScroll = remember {
         object : NestedScrollConnection {
@@ -144,7 +157,7 @@ fun HistoryBottomSheet(
                     // Close Button
                     NepoButton(
                         text = stringResource(id = R.string.settings_dialog_btn_close),
-                        onClick = onDismissRequest,
+                        onClick = animateDismiss,
                         visualTokens = theme.colors.interactiveComponents.closeButton,
                         icon = Lucide.X,
                         iconBold = true,
