@@ -31,8 +31,7 @@ object CurrencyRatesManager {
         "CURRENCY_CAD" to 1.41,
         "CURRENCY_CNY" to 6.80,
         "CURRENCY_RUB" to 90.0,
-        "CURRENCY_KPW" to 900.0,
-        "CURRENCY_IRR" to 42000.0
+        "CURRENCY_KRW" to 1350.0
     )
 
     private val ratesMap = HashMap<String, Double>().apply {

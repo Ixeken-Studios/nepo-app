@@ -157,6 +157,7 @@ data class CalculatorStyle(
     val keyboardCardBorderRadiusBottom: Dp = 0.dp,
     val buttonShapeType: String = "ROUNDED_RECTANGLE",
     val buttonBorderRadius: Dp = 16.dp,
+    val buttonOperatorsBorderRadius: Dp = buttonBorderRadius,
     val outerCardPadding: Dp = 0.dp,
     val outerCardBorderWidth: Dp = 0.dp,
     val outerCardBorderColor: Color = Color.Transparent,

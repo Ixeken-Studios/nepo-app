@@ -47,6 +47,7 @@ import kotlinx.coroutines.awaitCancellation
 import com.composables.icons.lucide.*
 import com.ixeken.nepo.core.designsystem.theme.LocalNepoTheme
 import com.ixeken.nepo.core.designsystem.theme.LocalNepoFontFamily
+import com.ixeken.nepo.core.designsystem.theme.LocalOriginalDensity
 import com.ixeken.nepo.core.designsystem.theme.NepoTheme
 import com.ixeken.nepo.core.designsystem.theme.ThemeParser
 import com.ixeken.nepo.features.calculator.R
@@ -83,6 +84,7 @@ fun CalculatorScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
     
     // Repositories
     val settingsRepository = remember { SettingsRepository(context) }
@@ -179,7 +181,9 @@ fun CalculatorScreen(
         val maxPartialSize = if (isLandscape) 18.sp else 20.sp
 
         val displayCard = @Composable { cardModifier: Modifier ->
-            val showCard = theme.calculatorStyle.visorShowCard
+            val originalDensity = LocalOriginalDensity.current
+            val body = @Composable {
+                val showCard = theme.calculatorStyle.visorShowCard
             val displayShape = RoundedCornerShape(
                 topStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
                 topEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
@@ -217,6 +221,7 @@ fun CalculatorScreen(
                                 if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "ocean_blue") Modifier.background(theme.colors.interactiveComponents.confirmButton.background, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -243,6 +248,7 @@ fun CalculatorScreen(
                                 if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "ocean_blue") Modifier.background(theme.colors.interactiveComponents.confirmButton.background, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -471,6 +477,7 @@ fun CalculatorScreen(
                                 if (isGlass) Modifier.background(Color(0x20FFFFFF), shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "bubble_tea") Modifier.background(theme.colors.surfaces.appBackground, shape = androidx.compose.foundation.shape.CircleShape)
                                 else if (theme.metadata.id == "monochromatic_elegance") Modifier.background(theme.colors.typography.headerAccent, shape = androidx.compose.foundation.shape.CircleShape)
+                                else if (theme.metadata.id == "ocean_blue") Modifier.background(theme.colors.interactiveComponents.confirmButton.background, shape = androidx.compose.foundation.shape.CircleShape)
                                 else Modifier
                             )
                             .clickable(
@@ -538,7 +545,7 @@ fun CalculatorScreen(
                                 minFontSize = 12.sp,
                                 color = if (isReadOnly) theme.colors.typography.screenSecondary else theme.colors.typography.screenPrimary,
                                 fontFamily = fontFamily,
-                                cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.screenPrimary),
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(2.dp))
@@ -574,7 +581,17 @@ fun CalculatorScreen(
                                 fontWeight = FontWeight.Bold,
                                 color = theme.colors.typography.screenPrimary,
                                 fontFamily = fontFamily,
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        if (destText.isNotEmpty()) {
+                                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(destText))
+                                            android.widget.Toast.makeText(context, context.getString(R.string.result_copied_toast), android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
                             )
                             Text(
                                 text = stringResource(id = targetUnit.nameResId).lowercase(),
@@ -630,7 +647,7 @@ fun CalculatorScreen(
                                             minFontSize = 12.sp,
                                             color = theme.colors.typography.screenSecondary,
                                             fontFamily = fontFamily,
-                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.screenSecondary),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
@@ -647,7 +664,17 @@ fun CalculatorScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = theme.colors.typography.screenPrimary,
                                             fontFamily = fontFamily,
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable(
+                                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                                    indication = null
+                                                ) {
+                                                    if (formattedResult.isNotEmpty()) {
+                                                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(formattedResult))
+                                                        android.widget.Toast.makeText(context, context.getString(R.string.result_copied_toast), android.widget.Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
                                         )
                                     }
                                     is VisorLayoutState.Typing -> {
@@ -680,7 +707,7 @@ fun CalculatorScreen(
                                             fontWeight = FontWeight.Bold,
                                             color = theme.colors.typography.screenPrimary,
                                             fontFamily = fontFamily,
-                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.headerAccent),
+                                            cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.screenPrimary),
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }
@@ -736,11 +763,21 @@ fun CalculatorScreen(
                     )
                 }
             }
+            }
+            if (originalDensity != null) {
+                CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides originalDensity) {
+                    body()
+                }
+            } else {
+                body()
+            }
         }
 
         val isInversedMode by viewModel.isInversedMode.collectAsState()
         val keyboardContent = @Composable { keyboardModifier: Modifier ->
-            val showKeyboardCard = theme.calculatorStyle.keyboardShowCard
+            val originalDensity = LocalOriginalDensity.current
+            val body = @Composable {
+                val showKeyboardCard = theme.calculatorStyle.keyboardShowCard
             if (showKeyboardCard) {
                 val keyboardShape = RoundedCornerShape(
                     topStart = theme.calculatorStyle.keyboardCardBorderRadiusTop,
@@ -748,8 +785,14 @@ fun CalculatorScreen(
                     bottomStart = theme.calculatorStyle.keyboardCardBorderRadiusBottom,
                     bottomEnd = theme.calculatorStyle.keyboardCardBorderRadiusBottom
                 )
+                val isOceanBlue = theme.metadata.id == "ocean_blue"
                 Box(
                     modifier = keyboardModifier
+                        .then(
+                            if (isOceanBlue) {
+                                Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
+                            } else Modifier
+                        )
                         .background(
                             color = theme.calculatorStyle.keyboardCardBackground,
                             shape = keyboardShape
@@ -782,12 +825,25 @@ fun CalculatorScreen(
                     onToggleInversedMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleInversedMode) },
                     modifier = keyboardModifier
                         .then(
+                            if (theme.metadata.id == "ocean_blue") {
+                                Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
+                            } else Modifier
+                        )
+                        .then(
                             if (theme.calculatorStyle.outerCardPadding == 0.dp) {
                                 Modifier.navigationBarsPadding()
                             } else Modifier
                         ),
                     hazeState = if (isGlass) hazeState else null
                 )
+            }
+            }
+            if (originalDensity != null) {
+                CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides originalDensity) {
+                    body()
+                }
+            } else {
+                body()
             }
         }
 

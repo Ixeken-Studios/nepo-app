@@ -130,6 +130,8 @@ object ThemeParser {
         val button_shape_type: String?,
         @SerializedName(value = "button_border_radius", alternate = ["buttonBorderRadius"])
         val button_border_radius: String?,
+        @SerializedName(value = "button_operators_border_radius", alternate = ["buttonOperatorsBorderRadius"])
+        val button_operators_border_radius: String?,
         @SerializedName(value = "outer_card_padding", alternate = ["outerCardPadding"])
         val outer_card_padding: String?,
         @SerializedName(value = "outer_card_border_width", alternate = ["outerCardBorderWidth"])
@@ -303,6 +305,11 @@ object ThemeParser {
                 buttonShapeType = jsonCalculatorStyle.button_shape_type ?: "ROUNDED_RECTANGLE",
                 buttonBorderRadius = try {
                     jsonCalculatorStyle.button_border_radius?.let { parseDp(it) } ?: 16.dp
+                } catch (e: Exception) {
+                    16.dp
+                },
+                buttonOperatorsBorderRadius = try {
+                    jsonCalculatorStyle.button_operators_border_radius?.let { parseDp(it) } ?: (jsonCalculatorStyle.button_border_radius?.let { parseDp(it) } ?: 16.dp)
                 } catch (e: Exception) {
                     16.dp
                 },

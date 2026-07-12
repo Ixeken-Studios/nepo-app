@@ -134,8 +134,7 @@ object ConverterRegistry {
         ConversionUnit("CURRENCY_CAD", R.string.unit_cad, R.string.unit_cad_abbr, UnitCategory.CURRENCY, 1.0),
         ConversionUnit("CURRENCY_CNY", R.string.unit_cny, R.string.unit_cny_abbr, UnitCategory.CURRENCY, 1.0),
         ConversionUnit("CURRENCY_RUB", R.string.unit_rub, R.string.unit_rub_abbr, UnitCategory.CURRENCY, 1.0),
-        ConversionUnit("CURRENCY_KPW", R.string.unit_kpw, R.string.unit_kpw_abbr, UnitCategory.CURRENCY, 1.0),
-        ConversionUnit("CURRENCY_IRR", R.string.unit_irr, R.string.unit_irr_abbr, UnitCategory.CURRENCY, 1.0)
+        ConversionUnit("CURRENCY_KRW", R.string.unit_krw, R.string.unit_krw_abbr, UnitCategory.CURRENCY, 1.0)
     )
 
     fun getUnitsForCategory(category: UnitCategory): List<ConversionUnit> {

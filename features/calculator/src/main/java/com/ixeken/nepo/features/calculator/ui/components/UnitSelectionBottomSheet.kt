@@ -96,260 +96,313 @@ fun UnitSelectionBottomSheet(
         androidx.compose.material3.ProvideTextStyle(
             value = androidx.compose.ui.text.TextStyle(fontFamily = fontFamily)
         ) {
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            var isSearchVisible by remember { mutableStateOf(false) }
+            var searchQuery by remember { mutableStateOf("") }
+            val context = LocalContext.current
+            val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 24.dp)
+                    .padding(horizontal = if (isLandscape) 16.dp else 20.dp)
+                    .padding(bottom = if (isLandscape) 8.dp else 24.dp)
             ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = stringResource(id = R.string.units_title),
-                        color = theme.colors.typography.bodyPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = fontFamily
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = title,
-                        color = theme.colors.typography.bodySecondary,
-                        fontSize = 14.sp,
-                        fontFamily = fontFamily
-                    )
-                }
-                
-                NepoButton(
-                    text = stringResource(id = R.string.settings_dialog_btn_close),
-                    onClick = animateDismiss,
-                    visualTokens = theme.colors.interactiveComponents.closeButton,
-                    icon = Lucide.X,
-                    iconBold = true,
-                    isKeyboardKey = false,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Search Bar
-            var searchQuery by remember { mutableStateOf("") }
-            val context = LocalContext.current
-            val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
-            
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text(text = stringResource(id = R.string.search_unit_placeholder), color = theme.colors.typography.bodySecondary) },
-                singleLine = true,
-                leadingIcon = if (searchQuery.isNotEmpty()) {
-                    {
-                        IconButton(
-                            onClick = {
-                                searchQuery = ""
-                                focusManager.clearFocus()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Lucide.ChevronLeft,
-                                contentDescription = "Clear search",
-                                tint = theme.colors.typography.bodySecondary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                } else null,
-                trailingIcon = {
-                    Icon(
-                        imageVector = Lucide.Search,
-                        contentDescription = null,
-                        tint = theme.colors.typography.bodySecondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = theme.colors.typography.bodyPrimary,
-                    unfocusedTextColor = theme.colors.typography.bodyPrimary,
-                    focusedBorderColor = theme.colors.typography.headerAccent,
-                    unfocusedBorderColor = theme.colors.structuralElements.itemSeparator,
-                    focusedContainerColor = theme.colors.interactiveComponents.numbersButton.background.copy(alpha = 0.5f),
-                    unfocusedContainerColor = theme.colors.interactiveComponents.numbersButton.background.copy(alpha = 0.3f)
-                ),
-                shape = RoundedCornerShape(theme.metadata.borderRadiusGlobal),
-                modifier = Modifier.fillMaxWidth()
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Categories Carousel
-            var activeCategory by remember { mutableStateOf(currentCategory) }
-            val categories = remember(isCurrencyEnabled) {
-                UnitCategory.values()
-                    .filter { isCurrencyEnabled || it != UnitCategory.CURRENCY }
-                    .sortedBy { context.getString(it.displayNameRes) }
-            }
-            
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(categories) { category ->
-                    val isSelected = category == activeCategory && searchQuery.isEmpty()
-                    val buttonColor = if (isSelected) {
-                        theme.colors.surfaces.calculatorScreenBackground
-                    } else {
-                        theme.colors.interactiveComponents.numbersButton.background
-                    }
-                    val textColor = if (isSelected) {
-                        theme.colors.typography.screenPrimary
-                    } else {
-                        theme.colors.typography.headerAccent
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(theme.metadata.borderRadiusGlobal))
-                            .background(buttonColor)
-                            .clickable {
-                                searchQuery = ""
-                                activeCategory = category
-                                onCategorySelected(category)
-                            }
-                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
+                // Header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = if (isLandscape) 6.dp else 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
                         Text(
-                            text = stringResource(id = category.displayNameRes),
-                            color = textColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
+                            text = stringResource(id = R.string.units_title),
+                            color = theme.colors.typography.bodyPrimary,
+                            fontSize = if (isLandscape) 16.sp else 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = fontFamily
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = title,
+                            color = theme.colors.typography.bodySecondary,
+                            fontSize = if (isLandscape) 12.sp else 14.sp,
                             fontFamily = fontFamily
                         )
                     }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Units Card Container
-            val filteredUnits = remember(searchQuery, activeCategory, isCurrencyEnabled) {
-                val baseList = if (searchQuery.isEmpty()) {
-                    ConverterRegistry.getUnitsForCategory(activeCategory)
-                } else {
-                    ConverterRegistry.units.filter {
-                        context.getString(it.nameResId).contains(searchQuery, ignoreCase = true) ||
-                        context.getString(it.abbrResId).contains(searchQuery, ignoreCase = true)
+                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (isLandscape) {
+                            NepoButton(
+                                text = "",
+                                onClick = {
+                                    isSearchVisible = !isSearchVisible
+                                    if (!isSearchVisible) {
+                                        searchQuery = ""
+                                        focusManager.clearFocus()
+                                    }
+                                },
+                                visualTokens = if (isSearchVisible) {
+                                    theme.colors.interactiveComponents.confirmButton
+                                } else {
+                                    theme.colors.interactiveComponents.closeButton
+                                },
+                                icon = Lucide.Search,
+                                iconBold = true,
+                                isKeyboardKey = false,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                        NepoButton(
+                            text = stringResource(id = R.string.settings_dialog_btn_close),
+                            onClick = animateDismiss,
+                            visualTokens = theme.colors.interactiveComponents.closeButton,
+                            icon = Lucide.X,
+                            iconBold = true,
+                            isKeyboardKey = false,
+                            modifier = Modifier.size(if (isLandscape) 30.dp else 36.dp)
+                        )
                     }
                 }
-                baseList.filter { isCurrencyEnabled || it.category != UnitCategory.CURRENCY }
-            }
-            
-            val cardShape = RoundedCornerShape(theme.settingsStyle.cardBorderRadius)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(theme.colors.interactiveComponents.numbersButton.background, shape = cardShape)
-                    .then(
-                        if (theme.structureStyle == StructureStyleType.GLASSMORPHISM) {
-                            Modifier.border(0.5.dp, theme.colors.structuralElements.itemSeparator, cardShape)
-                        } else Modifier
+
+                // Search Bar, Categories Carousel, and Units Card Container
+
+                val searchBar = @Composable {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text(text = stringResource(id = R.string.search_unit_placeholder), color = theme.colors.typography.bodySecondary, fontSize = if (isLandscape) 13.sp else 16.sp) },
+                        singleLine = true,
+                        leadingIcon = if (searchQuery.isNotEmpty()) {
+                            {
+                                IconButton(
+                                    onClick = {
+                                        searchQuery = ""
+                                        focusManager.clearFocus()
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Lucide.ChevronLeft,
+                                        contentDescription = "Clear search",
+                                        tint = theme.colors.typography.bodySecondary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        } else null,
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Lucide.Search,
+                                contentDescription = null,
+                                tint = theme.colors.typography.bodySecondary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = theme.colors.typography.bodyPrimary,
+                            unfocusedTextColor = theme.colors.typography.bodyPrimary,
+                            focusedBorderColor = theme.colors.typography.headerAccent,
+                            unfocusedBorderColor = theme.colors.structuralElements.itemSeparator,
+                            focusedContainerColor = theme.colors.interactiveComponents.numbersButton.background.copy(alpha = 0.5f),
+                            unfocusedContainerColor = theme.colors.interactiveComponents.numbersButton.background.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(theme.metadata.borderRadiusGlobal),
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    .padding(vertical = 4.dp)
-            ) {
-                if (filteredUnits.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                }
+
+                var activeCategory by remember { mutableStateOf(currentCategory) }
+                val categories = remember(isCurrencyEnabled) {
+                    UnitCategory.values()
+                        .filter { isCurrencyEnabled || it != UnitCategory.CURRENCY }
+                        .sortedBy { context.getString(it.displayNameRes) }
+                }
+
+                val categoriesCarousel = @Composable {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(
-                            imageVector = Lucide.Info,
-                            contentDescription = null,
-                            tint = theme.colors.typography.bodySecondary.copy(alpha = 0.8f),
-                            modifier = Modifier.size(36.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(id = R.string.search_unit_no_results),
-                            color = theme.colors.typography.bodySecondary,
-                            fontSize = 14.sp,
-                            fontFamily = fontFamily,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 450.dp)
-                            .nestedScroll(blockNestedScroll)
-                    ) {
-                        items(filteredUnits) { unit ->
-                            val isSelected = unit.id == selectedUnit.id
+                        items(categories) { category ->
+                            val isSelected = category == activeCategory && searchQuery.isEmpty()
+                            val buttonColor = if (isSelected) {
+                                theme.colors.surfaces.calculatorScreenBackground
+                            } else {
+                                theme.colors.interactiveComponents.numbersButton.background
+                            }
+                            val textColor = if (isSelected) {
+                                theme.colors.typography.screenPrimary
+                            } else {
+                                theme.colors.typography.headerAccent
+                            }
                             
-                            Row(
+                            Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(theme.metadata.borderRadiusGlobal))
+                                    .background(buttonColor)
                                     .clickable {
-                                        if (unit.category != activeCategory) {
-                                            activeCategory = unit.category
-                                            onCategorySelected(unit.category)
-                                        }
-                                        onUnitSelected(unit)
-                                        onDismissRequest()
+                                        searchQuery = ""
+                                        activeCategory = category
+                                        onCategorySelected(category)
                                     }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(horizontal = 14.dp, vertical = 6.dp)
                             ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(id = unit.nameResId),
-                                        color = theme.colors.typography.bodyPrimary,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontFamily = fontFamily
-                                    )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    Text(
-                                        text = stringResource(id = unit.abbrResId),
-                                        color = theme.colors.typography.bodySecondary,
-                                        fontSize = 13.sp,
-                                        fontFamily = fontFamily
-                                    )
-                                }
-                                
-                                if (isSelected) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(CircleShape)
-                                            .background(theme.colors.interactiveComponents.selectButton.background),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = Lucide.Check,
-                                            contentDescription = "Selected",
-                                            tint = theme.colors.interactiveComponents.selectButton.foreground,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = stringResource(id = category.displayNameRes),
+                                    color = textColor,
+                                    fontSize = if (isLandscape) 12.sp else 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = fontFamily
+                                )
                             }
                         }
                     }
                 }
-            }
-        }
+
+                val filteredUnits = remember(searchQuery, activeCategory, isCurrencyEnabled) {
+                    val baseList = if (searchQuery.isEmpty()) {
+                        ConverterRegistry.getUnitsForCategory(activeCategory)
+                    } else {
+                        ConverterRegistry.units.filter {
+                            context.getString(it.nameResId).contains(searchQuery, ignoreCase = true) ||
+                            context.getString(it.abbrResId).contains(searchQuery, ignoreCase = true)
+                        }
+                    }
+                    baseList.filter { isCurrencyEnabled || it.category != UnitCategory.CURRENCY }
+                }
+
+                val unitsContainer = @Composable { cardModifier: Modifier ->
+                    val cardShape = RoundedCornerShape(theme.settingsStyle.cardBorderRadius)
+                    Column(
+                        modifier = cardModifier
+                            .background(theme.colors.interactiveComponents.numbersButton.background, shape = cardShape)
+                            .then(
+                                if (theme.structureStyle == StructureStyleType.GLASSMORPHISM) {
+                                    Modifier.border(0.5.dp, theme.colors.structuralElements.itemSeparator, cardShape)
+                                } else Modifier
+                            )
+                            .padding(vertical = 4.dp)
+                    ) {
+                        if (filteredUnits.isEmpty()) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(if (isLandscape) 120.dp else 180.dp)
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Lucide.Info,
+                                    contentDescription = null,
+                                    tint = theme.colors.typography.bodySecondary.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = stringResource(id = R.string.search_unit_no_results),
+                                    color = theme.colors.typography.bodySecondary,
+                                    fontSize = 13.sp,
+                                    fontFamily = fontFamily,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = if (isLandscape) 180.dp else 450.dp)
+                                    .nestedScroll(blockNestedScroll)
+                            ) {
+                                items(filteredUnits) { unit ->
+                                    val isSelected = unit.id == selectedUnit.id
+                                    
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                if (unit.category != activeCategory) {
+                                                    activeCategory = unit.category
+                                                    onCategorySelected(unit.category)
+                                                }
+                                                onUnitSelected(unit)
+                                                onDismissRequest()
+                                            }
+                                            .padding(horizontal = 16.dp, vertical = if (isLandscape) 10.dp else 12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                             Text(
+                                                 text = stringResource(id = unit.nameResId),
+                                                 color = theme.colors.typography.bodyPrimary,
+                                                 fontSize = if (isLandscape) 14.sp else 16.sp,
+                                                 fontWeight = FontWeight.SemiBold,
+                                                 fontFamily = fontFamily
+                                             )
+                                             Spacer(modifier = Modifier.height(2.dp))
+                                             Text(
+                                                 text = stringResource(id = unit.abbrResId),
+                                                 color = theme.colors.typography.bodySecondary,
+                                                 fontSize = if (isLandscape) 11.sp else 13.sp,
+                                                 fontFamily = fontFamily
+                                             )
+                                         }
+                                         
+                                         if (isSelected) {
+                                             Box(
+                                                 modifier = Modifier
+                                                     .size(if (isLandscape) 20.dp else 24.dp)
+                                                     .clip(CircleShape)
+                                                     .background(theme.colors.interactiveComponents.selectButton.background),
+                                                 contentAlignment = Alignment.Center
+                                             ) {
+                                                 Icon(
+                                                     imageVector = Lucide.Check,
+                                                     contentDescription = "Selected",
+                                                     tint = theme.colors.interactiveComponents.selectButton.foreground,
+                                                     modifier = Modifier.size(if (isLandscape) 12.dp else 14.dp)
+                                                 )
+                                             }
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 }
+
+                  if (isLandscape) {
+                      Row(
+                          modifier = Modifier.fillMaxWidth(),
+                          horizontalArrangement = Arrangement.spacedBy(16.dp)
+                      ) {
+                          Column(
+                              modifier = Modifier.weight(1f),
+                              verticalArrangement = Arrangement.spacedBy(8.dp)
+                          ) {
+                              if (isSearchVisible) {
+                                  searchBar()
+                              }
+                              categoriesCarousel()
+                          }
+                          unitsContainer(Modifier.weight(1.2f))
+                      }
+                  } else {
+                      searchBar()
+                      Spacer(modifier = Modifier.height(8.dp))
+                      categoriesCarousel()
+                      Spacer(modifier = Modifier.height(16.dp))
+                      unitsContainer(Modifier.fillMaxWidth())
+                  }
+             }
     }
 }
 }

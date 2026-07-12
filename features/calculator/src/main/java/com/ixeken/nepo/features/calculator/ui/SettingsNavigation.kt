@@ -155,6 +155,9 @@ private fun SettingsHeader(
     isRoot: Boolean = false
 ) {
     val theme = LocalNepoTheme.current
+    val headerTextColor = theme.colors.typography.headerAccent
+    val breadcrumbColor = theme.colors.typography.headerAccent.copy(alpha = 0.7f)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,7 +173,7 @@ private fun SettingsHeader(
             if (breadcrumbParent != null) {
                 Text(
                     text = breadcrumbParent,
-                    color = theme.colors.typography.bodySecondary,
+                    color = breadcrumbColor,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -178,14 +181,14 @@ private fun SettingsHeader(
                 )
                 Text(
                     text = ">",
-                    color = theme.colors.typography.bodySecondary,
+                    color = breadcrumbColor,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Text(
                 text = activeNode,
-                color = theme.colors.typography.bodyPrimary,
+                color = headerTextColor,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -381,50 +384,57 @@ private fun SettingsRootScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         SettingsHeader(breadcrumbParent = null, activeNode = stringResource(id = R.string.settings_nav_root), onBackClick = onClose, isRoot = true)
         Spacer(modifier = Modifier.height(8.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_general))
-        SettingsCard {
-            MenuItem(title = stringResource(id = R.string.settings_option_converter), icon = Lucide.ArrowLeftRight, isLast = true) {
-                navController.navigate("converter")
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_preferences))
-        SettingsCard {
-            MenuItem(title = stringResource(id = R.string.settings_option_appearance), icon = Lucide.Palette) {
-                navController.navigate("appearance")
-            }
-            MenuItem(title = stringResource(id = R.string.settings_option_formatting), icon = Lucide.Binary, isLast = true) {
-                navController.navigate("formatting")
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_about))
-        SettingsCard {
-            AboutMenuItem(
-                title = stringResource(id = R.string.app_name_about),
-                subtitle = stringResource(id = R.string.app_version_about),
-                iconResId = R.drawable.ic_action_name,
-                onClick = {
-                    navController.navigate("about")
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_general))
+            SettingsCard {
+                MenuItem(title = stringResource(id = R.string.settings_option_converter), icon = Lucide.ArrowLeftRight, isLast = true) {
+                    navController.navigate("converter")
                 }
-            )
-            MenuItem(
-                title = stringResource(id = R.string.settings_option_privacy_notice),
-                icon = Lucide.Shield,
-                onClick = { showPrivacy = true }
-            )
-            CreditsMenuItem(
-                title = stringResource(id = R.string.settings_option_created_by),
-                subtitle = stringResource(id = R.string.settings_pill_made_in_mexico),
-                icon = Lucide.Heart,
-                isLast = true,
-                onClick = {
-                    try {
-                        uriHandler.openUri("https://github.com/Ixeken-Studios")
-                    } catch (e: Exception) {
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_preferences))
+            SettingsCard {
+                MenuItem(title = stringResource(id = R.string.settings_option_appearance), icon = Lucide.Palette) {
+                    navController.navigate("appearance")
+                }
+                MenuItem(title = stringResource(id = R.string.settings_option_formatting), icon = Lucide.Binary, isLast = true) {
+                    navController.navigate("formatting")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_about))
+            SettingsCard {
+                AboutMenuItem(
+                    title = stringResource(id = R.string.app_name_about),
+                    subtitle = stringResource(id = R.string.app_version_about),
+                    iconResId = R.drawable.ic_action_name,
+                    onClick = {
+                        navController.navigate("about")
                     }
-                }
-            )
+                )
+                MenuItem(
+                    title = stringResource(id = R.string.settings_option_privacy_notice),
+                    icon = Lucide.Shield,
+                    onClick = { showPrivacy = true }
+                )
+                CreditsMenuItem(
+                    title = stringResource(id = R.string.settings_option_created_by),
+                    subtitle = stringResource(id = R.string.settings_pill_made_in_mexico),
+                    icon = Lucide.Heart,
+                    isLast = true,
+                    onClick = {
+                        try {
+                            uriHandler.openUri("https://github.com/Ixeken-Studios")
+                        } catch (e: Exception) {
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -591,6 +601,88 @@ private fun AppearanceScreen(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+            val fontScaleOptions = remember { listOf(0.8f, 0.9f, 1.0f, 1.2f) }
+            val fontScaleLabels = listOf(
+                stringResource(id = R.string.font_scale_very_small),
+                stringResource(id = R.string.font_scale_small),
+                stringResource(id = R.string.font_scale_default),
+                stringResource(id = R.string.font_scale_big)
+            )
+            var fontScale by remember { mutableStateOf(settingsRepository.getFontScaleMultiplier()) }
+            val currentIndex = remember(fontScale) {
+                val index = fontScaleOptions.indexOf(fontScale)
+                if (index != -1) index else 2
+            }
+            SettingsCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (theme.settingsStyle.showMenuIcons) {
+                            androidx.compose.material3.Icon(
+                                imageVector = Lucide.Type,
+                                contentDescription = null,
+                                tint = theme.colors.typography.headerAccent,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(id = R.string.settings_option_font_scale),
+                                color = theme.colors.typography.bodyPrimary,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(id = R.string.settings_desc_font_scale),
+                                color = theme.colors.typography.bodySecondary,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = fontScaleLabels[currentIndex],
+                        color = theme.colors.typography.headerAccent,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = fontFamily,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    androidx.compose.material3.Slider(
+                        value = currentIndex.toFloat(),
+                        onValueChange = { value ->
+                            val targetIndex = value.toInt().coerceIn(0, 3)
+                            val targetScale = fontScaleOptions[targetIndex]
+                            fontScale = targetScale
+                            settingsRepository.setFontScaleMultiplier(targetScale)
+                            onThemeChanged()
+                        },
+                        valueRange = 0f..3f,
+                        steps = 2,
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            activeTrackColor = theme.colors.typography.headerAccent,
+                            thumbColor = theme.colors.typography.headerAccent,
+                            inactiveTrackColor = theme.colors.surfaces.appBackground,
+                            activeTickColor = theme.colors.surfaces.appBackground,
+                            inactiveTickColor = theme.colors.typography.bodySecondary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
             SettingsSectionHeader(stringResource(id = R.string.settings_section_keyboard_feedback))
             var isSoundEnabled by remember { mutableStateOf(settingsRepository.isSoundFeedbackEnabled()) }
             var isHapticEnabled by remember { mutableStateOf(settingsRepository.isHapticFeedbackEnabled()) }
@@ -677,9 +769,17 @@ private fun AppearanceScreen(
                 SelectMenuItem(
                     title = stringResource(id = R.string.settings_theme_monochromatic_elegance),
                     isSelected = currentTheme == "monochromatic_elegance",
-                    isLast = true,
                     onClick = {
                         settingsRepository.setThemeId("monochromatic_elegance")
+                        onThemeChanged()
+                    }
+                )
+                SelectMenuItem(
+                    title = stringResource(id = R.string.settings_theme_ocean_blue),
+                    isSelected = currentTheme == "ocean_blue",
+                    isLast = true,
+                    onClick = {
+                        settingsRepository.setThemeId("ocean_blue")
                         onThemeChanged()
                     }
                 )
@@ -688,31 +788,14 @@ private fun AppearanceScreen(
     }
     if (showFontsSheet) {
         val activeFont = settingsRepository.getFontName()
-        val fonts = listOf(
-            "Theme default",
-            "System default",
-            "Courier Prime",
-            "DM Mono",
-            "Doto",
-            "Fira Code",
-            "Google Sans Code",
-            "Google Sans Flex",
-            "JetBrains Mono",
-            "Josefin Sans",
-            "Kode Mono",
-            "Outfit",
-            "Roboto Mono",
-            "Share Tech Mono",
-            "Space Mono",
-            "VT323"
-        )
         SettingsBottomSheet(
             title = stringResource(id = R.string.settings_nav_fonts),
             onDismissRequest = { showFontsSheet = false }
         ) {
-            SettingsSectionHeader(stringResource(id = R.string.settings_label_select_font))
+            SettingsSectionHeader(stringResource(id = R.string.settings_font_section_default))
             SettingsCard {
-                fonts.forEachIndexed { index, fontName ->
+                val defaults = listOf("Theme default", "System default")
+                defaults.forEachIndexed { index, fontName ->
                     val isSelected = fontName == activeFont
                     val fontFamily = remember(fontName, theme) {
                         if (fontName == "Theme default") {
@@ -730,7 +813,43 @@ private fun AppearanceScreen(
                         title = titleText,
                         isSelected = isSelected,
                         fontFamily = fontFamily,
-                        isLast = index == fonts.lastIndex,
+                        isLast = index == defaults.lastIndex,
+                        onClick = {
+                            settingsRepository.setFontName(fontName)
+                            showFontsSheet = false
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            SettingsSectionHeader(stringResource(id = R.string.settings_font_section_fonts))
+            SettingsCard {
+                val actualFonts = listOf(
+                    "Courier Prime",
+                    "DM Mono",
+                    "Doto",
+                    "Fira Code",
+                    "Google Sans Code",
+                    "Google Sans Flex",
+                    "JetBrains Mono",
+                    "Josefin Sans",
+                    "Kode Mono",
+                    "Outfit",
+                    "Roboto Mono",
+                    "Share Tech Mono",
+                    "Space Mono",
+                    "VT323"
+                )
+                actualFonts.forEachIndexed { index, fontName ->
+                    val isSelected = fontName == activeFont
+                    val fontFamily = remember(fontName, theme) {
+                        getPreviewFontFamily(fontName)
+                    }
+                    SelectMenuItem(
+                        title = fontName,
+                        isSelected = isSelected,
+                        fontFamily = fontFamily,
+                        isLast = index == actualFonts.lastIndex,
                         onClick = {
                             settingsRepository.setFontName(fontName)
                             showFontsSheet = false
@@ -771,162 +890,169 @@ private fun FormattingScreen(
             onBackClick = { navController.popBackStack() }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_number_formatting))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_number_formatting))
 
-        // 1. Preview Card
-        SettingsCard {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                horizontalAlignment = Alignment.End
-            ) {
-                Text(
-                    text = stringResource(id = R.string.settings_label_preview),
-                    color = theme.colors.typography.bodySecondary,
-                    fontSize = 12.sp,
-                    fontFamily = fontFamily,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = formattedPreview,
-                    color = theme.colors.typography.bodyPrimary,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = fontFamily
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 2. Thousands Separator Selector Card
-        SettingsCard {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.settings_label_thousands_separator),
-                    color = theme.colors.typography.bodyPrimary,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            // 1. Preview Card
+            SettingsCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
-                    val separatorOptions = listOf(
-                        "Comma" to stringResource(id = R.string.settings_separator_comma),
-                        "Space" to stringResource(id = R.string.settings_separator_space),
-                        "Single quote" to stringResource(id = R.string.settings_separator_quote)
-                    )
-
-                    separatorOptions.forEach { (key, label) ->
-                        val isSelected = selectedSeparator == key
-                        val bg = if (isSelected) selectedBg else unselectedBg
-                        val textCol = if (isSelected) selectedText else unselectedText
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(CircleShape)
-                                .background(bg)
-                                .clickable(
-                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                    indication = null
-                                ) {
-                                    selectedSeparator = key
-                                    settingsRepository.setThousandsSeparator(key)
-                                }
-                                .padding(vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = textCol,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = fontFamily
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 3. Precision Slider Card
-        SettingsCard {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        if (theme.settingsStyle.showMenuIcons) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Lucide.SlidersHorizontal,
-                                contentDescription = null,
-                                tint = theme.colors.typography.headerAccent,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.settings_label_precision),
-                                color = theme.colors.typography.bodyPrimary,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = stringResource(id = R.string.settings_desc_precision),
-                                color = theme.colors.typography.bodySecondary,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
                     Text(
-                        text = if (decimalPlaces > 10) stringResource(id = R.string.settings_label_max) else decimalPlaces.toString(),
+                        text = stringResource(id = R.string.settings_label_preview),
+                        color = theme.colors.typography.bodySecondary,
+                        fontSize = 12.sp,
+                        fontFamily = fontFamily,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = formattedPreview,
                         color = theme.colors.typography.bodyPrimary,
-                        fontSize = 20.sp,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = fontFamily
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                androidx.compose.material3.Slider(
-                    value = decimalPlaces.toFloat(),
-                    onValueChange = { value ->
-                        val target = value.toInt()
-                        decimalPlaces = target
-                        settingsRepository.setDecimalPlaces(target)
-                    },
-                    valueRange = 1f..11f,
-                    steps = 9,
-                    colors = androidx.compose.material3.SliderDefaults.colors(
-                        activeTrackColor = theme.colors.typography.headerAccent,
-                        thumbColor = theme.colors.typography.headerAccent,
-                        inactiveTrackColor = theme.colors.surfaces.appBackground,
-                        activeTickColor = theme.colors.surfaces.appBackground,
-                        inactiveTickColor = theme.colors.typography.bodySecondary
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // 2. Thousands Separator Selector Card
+            SettingsCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.settings_label_thousands_separator),
+                        color = theme.colors.typography.bodyPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val separatorOptions = listOf(
+                            "Comma" to stringResource(id = R.string.settings_separator_comma),
+                            "Space" to stringResource(id = R.string.settings_separator_space),
+                            "Single quote" to stringResource(id = R.string.settings_separator_quote)
+                        )
+
+                        separatorOptions.forEach { (key, label) ->
+                            val isSelected = selectedSeparator == key
+                            val bg = if (isSelected) selectedBg else unselectedBg
+                            val textCol = if (isSelected) selectedText else unselectedText
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(CircleShape)
+                                    .background(bg)
+                                    .clickable(
+                                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        selectedSeparator = key
+                                        settingsRepository.setThousandsSeparator(key)
+                                    }
+                                    .padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = textCol,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = fontFamily
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 3. Precision Slider Card
+            SettingsCard {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (theme.settingsStyle.showMenuIcons) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Lucide.SlidersHorizontal,
+                                    contentDescription = null,
+                                    tint = theme.colors.typography.headerAccent,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Column {
+                                Text(
+                                    text = stringResource(id = R.string.settings_label_precision),
+                                    color = theme.colors.typography.bodyPrimary,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = stringResource(id = R.string.settings_desc_precision),
+                                    color = theme.colors.typography.bodySecondary,
+                                    fontSize = 12.sp
+                                )
+                           }
+                        }
+                        Text(
+                            text = if (decimalPlaces > 10) stringResource(id = R.string.settings_label_max) else decimalPlaces.toString(),
+                            color = theme.colors.typography.bodyPrimary,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = fontFamily
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    androidx.compose.material3.Slider(
+                        value = decimalPlaces.toFloat(),
+                        onValueChange = { value ->
+                            val target = value.toInt()
+                            decimalPlaces = target
+                            settingsRepository.setDecimalPlaces(target)
+                        },
+                        valueRange = 1f..11f,
+                        steps = 9,
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            activeTrackColor = theme.colors.typography.headerAccent,
+                            thumbColor = theme.colors.typography.headerAccent,
+                            inactiveTrackColor = theme.colors.surfaces.appBackground,
+                            activeTickColor = theme.colors.surfaces.appBackground,
+                            inactiveTickColor = theme.colors.typography.bodySecondary
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -984,7 +1110,7 @@ private fun AboutMenuItem(
                 ) {
                     Text(
                         text = subtitle,
-                        color = theme.colors.typography.bodySecondary,
+                        color = theme.colors.typography.headerAccent,
                         fontSize = 11.sp,
                         fontFamily = fontFamily,
                         fontWeight = FontWeight.Bold
@@ -1034,45 +1160,52 @@ private fun AboutScreen(
             onBackClick = { navController.popBackStack() }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        SettingsSectionHeader(stringResource(id = R.string.settings_section_info_updates))
-        
-        SettingsCard {
-            MenuItem(
-                title = stringResource(id = R.string.settings_option_view_repository),
-                icon = Lucide.Github,
-                onClick = {
-                    try {
-                        uriHandler.openUri("https://github.com/Ixeken-Studios/nepo-app")
-                    } catch (e: Exception) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SettingsSectionHeader(stringResource(id = R.string.settings_section_info_updates))
+            
+            SettingsCard {
+                MenuItem(
+                    title = stringResource(id = R.string.settings_option_view_repository),
+                    icon = Lucide.Github,
+                    onClick = {
+                        try {
+                            uriHandler.openUri("https://github.com/Ixeken-Studios/nepo-app")
+                        } catch (e: Exception) {
+                        }
                     }
-                }
-            )
+                )
 
-            MenuItem(
-                title = stringResource(id = R.string.settings_option_view_changelog),
-                icon = Lucide.ScrollText,
-                onClick = { showChangelog = true }
-            )
-            
-            MenuItem(
-                title = stringResource(id = R.string.settings_option_check_updates),
-                icon = Lucide.RefreshCw,
-                onClick = {
-                    showInternetConfirmDialog = true
-                }
-            )
-            
-            ToggleMenuItem(
-                title = stringResource(id = R.string.settings_option_check_update_on_start),
-                description = stringResource(id = R.string.settings_desc_check_update_on_start),
-                checked = checkOnStart,
-                onCheckedChange = { isChecked ->
-                    checkOnStart = isChecked
-                    settingsRepository.setCheckUpdateOnStartEnabled(isChecked)
-                },
-                icon = Lucide.Sparkles,
-                isLast = true
-            )
+                MenuItem(
+                    title = stringResource(id = R.string.settings_option_view_changelog),
+                    icon = Lucide.ScrollText,
+                    onClick = { showChangelog = true }
+                )
+                
+                MenuItem(
+                    title = stringResource(id = R.string.settings_option_check_updates),
+                    icon = Lucide.RefreshCw,
+                    onClick = {
+                        showInternetConfirmDialog = true
+                    }
+                )
+                
+                ToggleMenuItem(
+                    title = stringResource(id = R.string.settings_option_check_update_on_start),
+                    description = stringResource(id = R.string.settings_desc_check_update_on_start),
+                    checked = checkOnStart,
+                    onCheckedChange = { isChecked ->
+                        checkOnStart = isChecked
+                        settingsRepository.setCheckUpdateOnStartEnabled(isChecked)
+                    },
+                    icon = Lucide.Sparkles,
+                    isLast = true
+                )
+            }
         }
     }
 
@@ -1098,9 +1231,9 @@ private fun AboutScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     val points = listOf(
                         stringResource(id = R.string.changelog_point_1),
+                        stringResource(id = R.string.changelog_point_2),
                         stringResource(id = R.string.changelog_point_3),
-                        stringResource(id = R.string.changelog_point_4),
-                        stringResource(id = R.string.changelog_point_5)
+                        stringResource(id = R.string.changelog_point_4)
                     )
                     points.forEach { point ->
                         Text(
@@ -1319,7 +1452,7 @@ private fun CreditsMenuItem(
                 ) {
                     Text(
                         text = subtitle,
-                        color = theme.colors.typography.bodySecondary,
+                        color = theme.colors.typography.headerAccent,
                         fontSize = 11.sp,
                         fontFamily = fontFamily,
                         fontWeight = FontWeight.Bold
@@ -1349,15 +1482,15 @@ sealed interface UpdateResult {
 }
 
 private data class GitHubRelease(
-    val tag_name: String,
-    val html_url: String,
-    val body: String?,
-    val assets: List<GitHubAsset>?
+    @com.google.gson.annotations.SerializedName("tag_name") val tag_name: String = "",
+    @com.google.gson.annotations.SerializedName("html_url") val html_url: String = "",
+    @com.google.gson.annotations.SerializedName("body") val body: String? = null,
+    @com.google.gson.annotations.SerializedName("assets") val assets: List<GitHubAsset>? = null
 )
 
 private data class GitHubAsset(
-    val name: String,
-    val browser_download_url: String
+    @com.google.gson.annotations.SerializedName("name") val name: String = "",
+    @com.google.gson.annotations.SerializedName("browser_download_url") val browser_download_url: String = ""
 )
 
 private fun isNewerVersion(current: String, latest: String): Boolean {
@@ -1384,7 +1517,7 @@ suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = 
         val url = java.net.URL("https://api.github.com/repos/Ixeken-Studios/nepo-app/releases/latest")
         connection = url.openConnection() as java.net.HttpURLConnection
         connection.requestMethod = "GET"
-        connection.setRequestProperty("Accept", "application/vnd.github.v3+json")
+        connection.setRequestProperty("Accept", "application/vnd.github+json")
         connection.setRequestProperty("User-Agent", "Nepo-App")
         connection.connectTimeout = 8000
         connection.readTimeout = 8000
@@ -1412,9 +1545,16 @@ suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = 
                 UpdateResult.UpToDate
             }
         } else {
+            val errorText = try {
+                connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "No error body"
+            } catch (e: Exception) {
+                "Failed to read error body"
+            }
+            android.util.Log.e("NepoUpdateCheck", "GitHub API returned status $responseCode: $errorText")
             UpdateResult.Error
         }
     } catch (e: Exception) {
+        android.util.Log.e("NepoUpdateCheck", "Exception checking GitHub updates: ${e.message}", e)
         UpdateResult.Error
     } finally {
         connection?.disconnect()

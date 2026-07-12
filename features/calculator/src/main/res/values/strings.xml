@@ -37,13 +37,20 @@
     <!-- About Screen & Updates -->
     <string name="settings_section_about">About</string>
     <string name="app_name_about">Nepo</string>
-    <string name="app_version_about">v1.1.0</string>
+    <string name="app_version_about">v1.2.0</string>
     <string name="settings_section_info_updates">Information &amp; Updates</string>
     <string name="settings_option_view_changelog">View changelog</string>
     <string name="settings_option_check_updates">Check for updates</string>
     <string name="settings_option_check_update_on_start">Check update on start</string>
     <string name="settings_desc_check_update_on_start">Automatically check for update when the app starts</string>
     <string name="settings_option_view_repository">View repository</string>
+    <string name="result_copied_toast">Result copied to clipboard</string>
+    <string name="settings_option_font_scale">Label font size</string>
+    <string name="settings_desc_font_scale">Scale labels, menus and UI text (excludes visor/keyboard)</string>
+    <string name="font_scale_very_small">Very small</string>
+    <string name="font_scale_small">Small</string>
+    <string name="font_scale_default">Default</string>
+    <string name="font_scale_big">Big</string>
     
     <string name="settings_dialog_update_check">Update Check</string>
     <string name="settings_dialog_checking_updates">Checking for updates…</string>
@@ -59,12 +66,12 @@
     
     <string name="settings_sheet_changelog">Changelog</string>
     <string name="settings_sheet_version_history">Version history</string>
-    <string name="settings_sheet_version_latest">Version 1.1.0 (Latest)</string>
+    <string name="settings_sheet_version_latest">Version 1.2.0 (Latest)</string>
     
-    <string name="changelog_point_1">• Added Unit &amp; Currency converter supporting 10 different categories.</string>
-    <string name="changelog_point_3">• Quality of life enhancements including layout customization, new settings categories and improvements to the update checker.</string>
-    <string name="changelog_point_4">• Improved transparency regarding internet usage with explicit confirmation dialogs before making network requests.</string>
-    <string name="changelog_point_5">• Offline currency rates fallback support to prevent unnecessary network connections.</string>
+    <string name="changelog_point_1">• Added new beautiful themes to customize the application\'s appearance.</string>
+    <string name="changelog_point_2">• Added a separator for the default fonts in the font section.</string>
+    <string name="changelog_point_3">• Added a slider to customize the app font size.</string>
+    <string name="changelog_point_4">• Fixed minor layout and font rendering bugs for improved stability.</string>
 
     <!-- Keyboard Feedback -->
     <string name="settings_section_keyboard_feedback">Keyboard Feedback</string>
@@ -100,8 +107,11 @@
     <string name="settings_theme_yellow_harmony">Yellow harmony</string>
     <string name="settings_theme_bubble_tea">Bubble tea</string>
     <string name="settings_theme_monochromatic_elegance">Monochromatic Elegance</string>
+    <string name="settings_theme_ocean_blue">Ocean Blue</string>
     <string name="settings_font_system_default">System default</string>
     <string name="settings_font_theme_default">Theme default</string>
+    <string name="settings_font_section_default">Default</string>
+    <string name="settings_font_section_fonts">Fonts</string>
 
     <!-- Unit Converter Strings -->
     <string name="units_title">Units</string>
@@ -122,7 +132,7 @@
     <string name="settings_section_general">General</string>
     <string name="settings_option_converter">Unit converter</string>
     <string name="settings_option_enable_currency">Enable currency converter</string>
-    <string name="settings_desc_enable_currency">Allow downloading daily exchange rates from the internet.</string>
+    <string name="settings_desc_enable_currency">Allow downloading daily exchange rates from ExchangeRate-API (open.er-api.com).</string>
     <string name="currency_rates_status">Rates: %1$s</string>
     <string name="currency_rates_offline">offline</string>
 
@@ -313,8 +323,6 @@
     <string name="unit_cny_abbr">CNY</string>
     <string name="unit_rub">Russian Ruble</string>
     <string name="unit_rub_abbr">RUB</string>
-    <string name="unit_kpw">North Korean Won</string>
-    <string name="unit_kpw_abbr">KPW</string>
-    <string name="unit_irr">Iranian Rial</string>
-    <string name="unit_irr_abbr">IRR</string>
+    <string name="unit_krw">South Korean Won</string>
+    <string name="unit_krw_abbr">KRW</string>
 </resources>

@@ -60,11 +60,26 @@ fun NepoButton(
 ) {
     val theme = LocalNepoTheme.current
     val fontFamily = LocalNepoFontFamily.current
+    val isOperator = visualTokens == theme.colors.interactiveComponents.operatorButton ||
+                     visualTokens == theme.colors.interactiveComponents.confirmButton ||
+                     visualTokens == theme.colors.interactiveComponents.deleteButton
+    val targetRadius = if (isOperator) {
+        theme.calculatorStyle.buttonOperatorsBorderRadius
+    } else {
+        theme.calculatorStyle.buttonBorderRadius
+    }
     val shape = if (isKeyboardKey) {
         when (theme.calculatorStyle.buttonShapeType) {
             "CIRCLE" -> androidx.compose.foundation.shape.CircleShape
             "SQUARE" -> RoundedCornerShape(0.dp)
-            "SQUIRCLE", "ROUNDED_RECTANGLE" -> RoundedCornerShape(theme.calculatorStyle.buttonBorderRadius)
+            "MIXED" -> {
+                if (isOperator) {
+                    RoundedCornerShape(theme.calculatorStyle.buttonOperatorsBorderRadius)
+                } else {
+                    androidx.compose.foundation.shape.CircleShape
+                }
+            }
+            "SQUIRCLE", "ROUNDED_RECTANGLE" -> RoundedCornerShape(targetRadius)
             else -> RoundedCornerShape(theme.metadata.borderRadiusGlobal)
         }
     } else {
@@ -155,7 +170,8 @@ fun NepoButton(
                 color = visualTokens.foreground,
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontFamily = fontFamily,
-                    fontSize = if (fontSize != androidx.compose.ui.unit.TextUnit.Unspecified) fontSize else MaterialTheme.typography.titleLarge.fontSize
+                    fontSize = if (fontSize != androidx.compose.ui.unit.TextUnit.Unspecified) fontSize else MaterialTheme.typography.titleLarge.fontSize,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                 )
             )
         }

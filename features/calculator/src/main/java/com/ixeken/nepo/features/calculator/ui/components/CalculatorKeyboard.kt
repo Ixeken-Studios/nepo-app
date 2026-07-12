@@ -46,7 +46,7 @@ fun CalculatorKeyboard(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val spaceBetween = if (isLandscape) 4.dp else 8.dp
     val buttonModifier = if (isLandscape) Modifier.fillMaxHeight() else {
-        if (mode == "SCIENTIFIC") Modifier.aspectRatio(1.22f)
+        if (mode == "SCIENTIFIC" || mode == "CONVERTER") Modifier.aspectRatio(1.22f)
         else Modifier.aspectRatio(1f)
     }
  

@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "id": "ocean_blue",
+    "display_name": "Ocean Blue",
+    "icons_library": "lucide-icons",
+    "border_radius_global": "24px",
+    "default_font_name": "Google Sans"
+  },
+  "settings_style": {
+    "use_cards": true,
+    "card_border_radius": "24px",
+    "show_menu_icons": true,
+    "show_dividers": false,
+    "show_header_separators": false
+  },
+  "calculator_style": {
+    "visor_show_card": true,
+    "visor_border_radius": "24px",
+    "visor_card_border_radius_top": "0px",
+    "visor_card_border_radius_bottom": "24px",
+    "keyboard_show_card": false,
+    "button_shape_type": "MIXED",
+    "button_border_radius": "24px",
+    "button_operators_border_radius": "12px",
+    "outer_card_padding": "0px"
+  },
+  "colors": {
+    "surfaces": {
+      "app_background": "#b9d6f2",
+      "bottom_sheet_background": "#133c55",
+      "calculator_screen_background": "#133c55"
+    },
+    "typography": {
+      "title": "#b9d6f2",
+      "header_accent": "#133c55",
+      "body_primary": "#b9d6f2",
+      "body_secondary": "#91e5f6",
+      "screen_primary": "#91e5f6",
+      "screen_secondary": "#59a5d8"
+    },
+    "interactive_components": {
+      "done_button": {
+        "foreground": "#133c55",
+        "background": "#91e5f6"
+      },
+      "close_button": {
+        "foreground": "#b9d6f2",
+        "background": "#386fa4"
+      },
+      "back_button": {
+        "foreground": "#b9d6f2",
+        "background": "#386fa4"
+      },
+      "confirm_button": {
+        "foreground": "#133c55",
+        "background": "#59a5d8"
+      },
+      "select_button": {
+        "foreground": "#133c55",
+        "background": "#59a5d8"
+      },
+      "operator_button": {
+        "foreground": "#91e5f6",
+        "background": "#133c55"
+      },
+      "numbers_button": {
+        "foreground": "#b9d6f2",
+        "background": "#386fa4"
+      },
+      "delete_button": {
+        "foreground": "#91e5f6",
+        "background": "#59a5d8"
+      }
+    },
+    "structural_elements": {
+      "header_separator": "#59a5d8",
+      "item_separator": "#386fa4"
+    }
+  }
+}

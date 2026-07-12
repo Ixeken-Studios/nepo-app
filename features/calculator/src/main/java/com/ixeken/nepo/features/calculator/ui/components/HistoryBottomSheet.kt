@@ -139,7 +139,7 @@ fun HistoryBottomSheet(
                     // Edit Mode Button (Capsule shaped, matching mockup)
                     val editButtonTokens = remember(theme) {
                         com.ixeken.nepo.core.designsystem.models.ComponentVisualTokens(
-                            foreground = theme.colors.typography.bodyPrimary,
+                            foreground = theme.colors.interactiveComponents.confirmButton.foreground,
                             background = theme.colors.interactiveComponents.confirmButton.background
                         )
                     }
@@ -190,33 +190,23 @@ fun HistoryBottomSheet(
                     val deleteQtyText = stringResource(id = R.string.history_btn_delete_quantity, selectedCount)
                     val actionText = if (selectedCount == 0) clearAllText else deleteQtyText
                     
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(theme.colors.interactiveComponents.confirmButton.background.copy(alpha = 0.8f))
-                            .clickable(
-                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                if (selectedCount == 0) {
-                                    onClearAll()
-                                } else {
-                                    onDeleteEntries(selectedIds.value)
-                                    selectedIds.value = emptySet()
-                                }
-                                isEditMode = false
+                    NepoButton(
+                        text = actionText,
+                        onClick = {
+                            if (selectedCount == 0) {
+                                onClearAll()
+                            } else {
+                                onDeleteEntries(selectedIds.value)
+                                selectedIds.value = emptySet()
                             }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = actionText,
-                            color = theme.colors.typography.headerAccent,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = fontFamily
-                        )
-                    }
+                            isEditMode = false
+                        },
+                        visualTokens = theme.colors.interactiveComponents.confirmButton,
+                        fontSize = 14.sp,
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        isKeyboardKey = false,
+                        modifier = Modifier.height(36.dp)
+                    )
                 }
             }
 

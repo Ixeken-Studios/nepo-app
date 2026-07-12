@@ -57,7 +57,7 @@ private fun getGoogleFontFamily(name: String): FontFamily {
             )
         )
     } catch (e: Exception) {
-        FontFamily.Monospace
+        FontFamily.Default
     }
 }
 
@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
             // Listen to theme or font preference changes and force UI recomposition
             DisposableEffect(settingsRepository) {
                 val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-                    if (key == "active_theme_id" || key == "active_font_name") {
+                    if (key == "active_theme_id" || key == "active_font_name" || key == "font_scale_multiplier") {
                         themeUpdateTrigger++
                     }
                 }
@@ -163,8 +163,20 @@ class MainActivity : ComponentActivity() {
             }
 
             NepoTheme(currentStyles = activeTheme, fontFamily = activeFontFamily) {
-                val calcViewModel = remember { CalculatorViewModel(mathEngine) }
-                var currentScreen by rememberSaveable { mutableStateOf(AppScreen.CALCULATOR) }
+                val systemDensity = androidx.compose.ui.platform.LocalDensity.current
+                val fontScaleMultiplier = remember(themeUpdateTrigger) { settingsRepository.getFontScaleMultiplier() }
+                val scaledDensity = remember(systemDensity, fontScaleMultiplier) {
+                    androidx.compose.ui.unit.Density(
+                        density = systemDensity.density,
+                        fontScale = systemDensity.fontScale * fontScaleMultiplier
+                    )
+                }
+                CompositionLocalProvider(
+                    com.ixeken.nepo.core.designsystem.theme.LocalOriginalDensity provides systemDensity,
+                    androidx.compose.ui.platform.LocalDensity provides scaledDensity
+                ) {
+                    val calcViewModel = remember { CalculatorViewModel(mathEngine) }
+                    var currentScreen by rememberSaveable { mutableStateOf(AppScreen.CALCULATOR) }
 
                 var showStartUpdateDialog by remember { mutableStateOf(false) }
                 var startUpdateResult by remember { mutableStateOf<UpdateResult?>(null) }
@@ -234,6 +246,7 @@ class MainActivity : ComponentActivity() {
                     onDismissRequest = { showStartUpdateDialog = false },
                     onRetryClick = {}
                 )
+                }
                 }
             }
         }

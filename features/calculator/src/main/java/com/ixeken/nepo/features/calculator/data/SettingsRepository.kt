@@ -26,6 +26,7 @@ class SettingsRepository(context: Context) {
         private const val KEY_CONVERTER_TARGET_PREFIX = "converter_target_"
         private const val KEY_CONVERTER_LAYOUT = "converter_layout"
         private const val KEY_ENABLE_CURRENCY = "enable_currency"
+        private const val KEY_FONT_SCALE_MULTIPLIER = "font_scale_multiplier"
     }
 
     /**
@@ -315,5 +316,19 @@ class SettingsRepository(context: Context) {
      */
     fun setCurrencyEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_ENABLE_CURRENCY, enabled).apply()
+    }
+
+    /**
+     * Gets the saved application-wide label font scale multiplier. Defaults to 1.0f.
+     */
+    fun getFontScaleMultiplier(): Float {
+        return prefs.getFloat(KEY_FONT_SCALE_MULTIPLIER, 1.0f)
+    }
+
+    /**
+     * Sets the application-wide label font scale multiplier.
+     */
+    fun setFontScaleMultiplier(scale: Float) {
+        prefs.edit().putFloat(KEY_FONT_SCALE_MULTIPLIER, scale).apply()
     }
 }

@@ -24,6 +24,13 @@ val LocalNepoFontFamily = staticCompositionLocalOf<FontFamily> {
 }
 
 /**
+ * CompositionLocal used to propagate the original system density down the Compose tree.
+ */
+val LocalOriginalDensity = staticCompositionLocalOf<androidx.compose.ui.unit.Density?> {
+    null
+}
+
+/**
  * Theme provider wrapper that exposes the provided [currentStyles] to nested Composable content.
  *
  * Use this wrapper at the root of your layout hierarchy to enable dynamic styling.
