@@ -67,6 +67,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 
 
 
+private fun copyToClipboard(context: android.content.Context, text: String) {
+    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+    val clip = android.content.ClipData.newPlainText("Nepo", text)
+    clipboard?.setPrimaryClip(clip)
+}
+
 /**
  * Main Calculator screen.
  *
@@ -84,7 +90,6 @@ fun CalculatorScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val clipboardManager = androidx.compose.ui.platform.LocalClipboardManager.current
     
     // Repositories
     val settingsRepository = remember { SettingsRepository(context) }
@@ -173,41 +178,50 @@ fun CalculatorScreen(
         val hazeState = rememberHazeState()
         val isGlass = theme.structureStyle == StructureStyleType.GLASSMORPHISM
 
-        val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-        val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+        BoxWithConstraints(
+            modifier = modifier
+                .fillMaxSize()
+                .background(theme.colors.surfaces.appBackground)
+        ) {
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val isWindowLandscape = maxWidth > maxHeight
+            val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE || isWindowLandscape
+            val isCompactHeight = maxHeight < 580.dp
+            val isUltraCompact = maxHeight < 460.dp
 
-        val maxResultSize = if (isLandscape) 36.sp else 54.sp
-        val maxExpressionSize = if (isLandscape) 28.sp else 36.sp
-        val maxPartialSize = if (isLandscape) 18.sp else 20.sp
+            val maxResultSize = if (isLandscape) 36.sp else if (isUltraCompact) 26.sp else if (isCompactHeight) 38.sp else 54.sp
+            val maxExpressionSize = if (isLandscape) 28.sp else if (isUltraCompact) 20.sp else if (isCompactHeight) 26.sp else 36.sp
+            val maxPartialSize = if (isLandscape) 18.sp else if (isUltraCompact) 14.sp else if (isCompactHeight) 16.sp else 20.sp
 
-        val displayCard = @Composable { cardModifier: Modifier ->
-            val originalDensity = LocalOriginalDensity.current
-            val body = @Composable {
-                val showCard = theme.calculatorStyle.visorShowCard
-            val displayShape = RoundedCornerShape(
-                topStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
-                topEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
-                bottomStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp,
-                bottomEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp
-            )
-            Column(
-                modifier = cardModifier
-                    .then(
-                        if (showCard) {
-                            Modifier.background(
-                                color = theme.colors.surfaces.calculatorScreenBackground,
-                                shape = displayShape
-                            )
-                        } else Modifier
-                    )
-                    .then(
-                        if (theme.calculatorStyle.outerCardPadding == 0.dp) {
-                            Modifier.statusBarsPadding()
-                        } else Modifier
-                    )
-                    .padding(if (currentMode == "CONVERTER") 12.dp else 16.dp)
-            ) {
-                // Top control row inside the display card
+            val displayCard = @Composable { cardModifier: Modifier ->
+                val originalDensity = LocalOriginalDensity.current
+                val body = @Composable {
+                    val showCard = theme.calculatorStyle.visorShowCard
+                val displayShape = RoundedCornerShape(
+                    topStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
+                    topEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusTop else 0.dp,
+                    bottomStart = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp,
+                    bottomEnd = if (showCard) theme.calculatorStyle.visorCardBorderRadiusBottom else 0.dp
+                )
+                Column(
+                    modifier = cardModifier
+                        .then(
+                            if (showCard) {
+                                Modifier.background(
+                                    color = theme.colors.surfaces.calculatorScreenBackground,
+                                    shape = displayShape
+                                )
+                            } else Modifier
+                        )
+                        .then(
+                            if (theme.calculatorStyle.outerCardPadding == 0.dp) {
+                                Modifier.statusBarsPadding()
+                            } else Modifier
+                        )
+                        .padding(if (isUltraCompact) 4.dp else if (isCompactHeight) 8.dp else if (currentMode == "CONVERTER") 12.dp else 16.dp)
+                ) {
+                // Top control row inside the display card (Only when not ultra compact)
+                if (!isUltraCompact) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -494,6 +508,7 @@ fun CalculatorScreen(
                         )
                     }
                 }
+                }
 
                 // Output text stack, aligned bottom-right
                 Column(
@@ -588,7 +603,7 @@ fun CalculatorScreen(
                                         indication = null
                                     ) {
                                         if (destText.isNotEmpty()) {
-                                            clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(destText))
+                                            copyToClipboard(context, destText)
                                             android.widget.Toast.makeText(context, context.getString(R.string.result_copied_toast), android.widget.Toast.LENGTH_SHORT).show()
                                         }
                                     }
@@ -644,13 +659,13 @@ fun CalculatorScreen(
                                             onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
                                             readOnly = true,
                                             maxFontSize = maxPartialSize,
-                                            minFontSize = 12.sp,
+                                            minFontSize = 10.sp,
                                             color = theme.colors.typography.screenSecondary,
                                             fontFamily = fontFamily,
                                             cursorBrush = androidx.compose.ui.graphics.SolidColor(theme.colors.typography.screenSecondary),
                                             modifier = Modifier.fillMaxWidth()
                                         )
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         // Bottom: Final result (total) is large
                                         val formattedResult = try {
                                             settingsRepository.formatNumber(state.finalResult.toDouble())
@@ -660,7 +675,7 @@ fun CalculatorScreen(
                                         AutoResizeText(
                                             text = formattedResult,
                                             maxFontSize = maxResultSize,
-                                            minFontSize = 24.sp,
+                                            minFontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = theme.colors.typography.screenPrimary,
                                             fontFamily = fontFamily,
@@ -671,7 +686,7 @@ fun CalculatorScreen(
                                                     indication = null
                                                 ) {
                                                     if (formattedResult.isNotEmpty()) {
-                                                        clipboardManager.setText(androidx.compose.ui.text.AnnotatedString(formattedResult))
+                                                        copyToClipboard(context, formattedResult)
                                                         android.widget.Toast.makeText(context, context.getString(R.string.result_copied_toast), android.widget.Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
@@ -691,19 +706,19 @@ fun CalculatorScreen(
                                         AutoResizeText(
                                             text = formattedPartial,
                                             maxFontSize = maxPartialSize,
-                                            minFontSize = 12.sp,
+                                            minFontSize = 10.sp,
                                             color = theme.colors.typography.screenSecondary,
                                             fontFamily = fontFamily,
                                             modifier = Modifier.fillMaxWidth()
                                         )
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(2.dp))
                                         // Bottom: Operation (expression) is large, editable as a text box with cursor
                                         AutoResizeTextField(
                                             value = state.expression,
                                             onValueChange = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnExpressionValueChanged(it)) },
                                             readOnly = false,
                                             maxFontSize = maxExpressionSize,
-                                            minFontSize = 18.sp,
+                                            minFontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = theme.colors.typography.screenPrimary,
                                             fontFamily = fontFamily,
@@ -712,10 +727,11 @@ fun CalculatorScreen(
                                         )
                                     }
                                     is VisorLayoutState.Empty -> {
-                                        // Empty state shows slashed zero 'Ø' aligned top-right
-                                        Text(
+                                        // Empty state shows slashed zero 'Ø' aligned top-right with AutoResizeText
+                                        AutoResizeText(
                                             text = "0",
-                                            fontSize = if (isLandscape) 42.sp else 64.sp,
+                                            maxFontSize = if (isLandscape) 42.sp else if (isUltraCompact) 28.sp else if (isCompactHeight) 38.sp else 64.sp,
+                                            minFontSize = 10.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = theme.colors.typography.screenPrimary,
                                             fontFamily = fontFamily,
@@ -811,7 +827,9 @@ fun CalculatorScreen(
                         isInversedMode = isInversedMode,
                         onToggleDegreeMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleDegreeMode) },
                         onToggleInversedMode = { viewModel.onEvent(com.ixeken.nepo.features.calculator.presentation.CalculatorUserEvent.OnToggleInversedMode) },
-                        modifier = if (isLandscape) Modifier.fillMaxSize() else Modifier.fillMaxWidth(),
+                        modifier = if (isLandscape || isCompactHeight) Modifier.fillMaxSize() else Modifier.fillMaxWidth(),
+                        isCompactHeight = isCompactHeight,
+                        isUltraCompact = isUltraCompact,
                         hazeState = if (isGlass) hazeState else null
                     )
                 }
@@ -834,6 +852,8 @@ fun CalculatorScreen(
                                 Modifier.navigationBarsPadding()
                             } else Modifier
                         ),
+                    isCompactHeight = isCompactHeight,
+                    isUltraCompact = isUltraCompact,
                     hazeState = if (isGlass) hazeState else null
                 )
             }
@@ -917,25 +937,69 @@ fun CalculatorScreen(
                         keyboardContent(Modifier.weight(keyboardWeight).fillMaxHeight())
                     }
                 } else {
-                    displayCard(Modifier.fillMaxWidth().weight(1.0f))
-                    if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        UnitSelectorRow(
-                            sourceUnit = sourceUnit,
-                            targetUnit = targetUnit,
-                            onSourceClick = { showSourceUnitSheet = true },
-                            onTargetClick = { showTargetUnitSheet = true },
-                            onSwapClick = {
-                                val temp = sourceUnit
-                                sourceUnit = targetUnit
-                                targetUnit = temp
-                                settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
-                                settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
-                            }
-                        )
+                    if (isUltraCompact) {
+                        displayCard(Modifier.fillMaxWidth().weight(0.24f))
+                        if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            UnitSelectorRow(
+                                sourceUnit = sourceUnit,
+                                targetUnit = targetUnit,
+                                onSourceClick = { showSourceUnitSheet = true },
+                                onTargetClick = { showTargetUnitSheet = true },
+                                onSwapClick = {
+                                    val temp = sourceUnit
+                                    sourceUnit = targetUnit
+                                    targetUnit = temp
+                                    settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                    settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        keyboardContent(Modifier.fillMaxWidth().weight(0.76f))
+                    } else if (isCompactHeight) {
+                        val visorWeight = if (currentMode == "SCIENTIFIC") 0.30f else 0.35f
+                        val keyboardWeight = if (currentMode == "SCIENTIFIC") 0.70f else 0.65f
+                        displayCard(Modifier.fillMaxWidth().weight(visorWeight))
+                        if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            UnitSelectorRow(
+                                sourceUnit = sourceUnit,
+                                targetUnit = targetUnit,
+                                onSourceClick = { showSourceUnitSheet = true },
+                                onTargetClick = { showTargetUnitSheet = true },
+                                onSwapClick = {
+                                    val temp = sourceUnit
+                                    sourceUnit = targetUnit
+                                    targetUnit = temp
+                                    settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                    settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        keyboardContent(Modifier.fillMaxWidth().weight(keyboardWeight))
+                    } else {
+                        displayCard(Modifier.fillMaxWidth().weight(1.0f))
+                        if (currentMode == "CONVERTER" && converterLayout == "OUTSIDE") {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            UnitSelectorRow(
+                                sourceUnit = sourceUnit,
+                                targetUnit = targetUnit,
+                                onSourceClick = { showSourceUnitSheet = true },
+                                onTargetClick = { showTargetUnitSheet = true },
+                                onSwapClick = {
+                                    val temp = sourceUnit
+                                    sourceUnit = targetUnit
+                                    targetUnit = temp
+                                    settingsRepository.setSourceUnit(activeCategory.name, sourceUnit.id)
+                                    settingsRepository.setTargetUnit(activeCategory.name, targetUnit.id)
+                                }
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        keyboardContent(Modifier.fillMaxWidth())
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
-                    keyboardContent(Modifier.fillMaxWidth())
             }
         }
     }
@@ -1027,6 +1091,7 @@ fun CalculatorScreen(
             }
         }
     }
+}
 
 @Composable
 private fun AutoResizeText(
@@ -1057,8 +1122,8 @@ private fun AutoResizeText(
                 if (readyToDraw) drawContent()
             },
         onTextLayout = { result ->
-            if (result.didOverflowWidth && fontSize.value > minFontSize.value) {
-                fontSize = (fontSize.value - 2).sp
+            if ((result.didOverflowWidth || result.didOverflowHeight) && fontSize.value > minFontSize.value) {
+                fontSize = (fontSize.value - 1).sp
             } else {
                 readyToDraw = true
             }
@@ -1109,8 +1174,8 @@ private fun AutoResizeTextField(
                     if (readyToDraw) drawContent()
                 },
             onTextLayout = { result ->
-                if (result.didOverflowWidth && fontSize.value > minFontSize.value) {
-                    fontSize = (fontSize.value - 2).sp
+                if ((result.didOverflowWidth || result.didOverflowHeight) && fontSize.value > minFontSize.value) {
+                    fontSize = (fontSize.value - 1).sp
                 } else {
                     readyToDraw = true
                 }

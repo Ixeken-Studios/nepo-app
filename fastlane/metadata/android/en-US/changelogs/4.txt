@@ -1,0 +1,5 @@
+- Added Ultra-Compact mode optimized for floating Pop-Up windows and small screens.
+- Fixed visor text clipping for initial zero and calculation results.
+- Added confirmation dialog before enabling automatic update checks at launch.
+- Added Time Machine detector for ahead-of-release app versions.
+- Code cleanup and deprecation fixes for Android API 34+.

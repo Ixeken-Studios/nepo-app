@@ -1147,6 +1147,7 @@ private fun AboutScreen(
     var checkingUpdates by remember { mutableStateOf(false) }
     var updateResult by remember { mutableStateOf<UpdateResult?>(null) }
     var showInternetConfirmDialog by remember { mutableStateOf(false) }
+    var pendingCheckOnStart by remember { mutableStateOf<Boolean?>(null) }
     
     var checkOnStart by remember { mutableStateOf(settingsRepository.isCheckUpdateOnStartEnabled()) }
 
@@ -1199,8 +1200,7 @@ private fun AboutScreen(
                     description = stringResource(id = R.string.settings_desc_check_update_on_start),
                     checked = checkOnStart,
                     onCheckedChange = { isChecked ->
-                        checkOnStart = isChecked
-                        settingsRepository.setCheckUpdateOnStartEnabled(isChecked)
+                        pendingCheckOnStart = isChecked
                     },
                     icon = Lucide.Sparkles,
                     isLast = true
@@ -1247,6 +1247,58 @@ private fun AboutScreen(
                 }
             }
         }
+    }
+
+    if (pendingCheckOnStart != null) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingCheckOnStart = null },
+            containerColor = theme.colors.surfaces.bottomSheetBackground,
+            title = {
+                Text(
+                    text = stringResource(id = R.string.settings_dialog_internet_confirm_title),
+                    color = theme.colors.typography.bodyPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = fontFamily
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(id = R.string.settings_dialog_internet_confirm_desc),
+                    color = theme.colors.typography.bodySecondary,
+                    fontSize = 14.sp,
+                    fontFamily = fontFamily
+                )
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    NepoButton(
+                        text = stringResource(id = R.string.settings_dialog_internet_btn_proceed),
+                        onClick = {
+                            val targetState = pendingCheckOnStart ?: false
+                            checkOnStart = targetState
+                            settingsRepository.setCheckUpdateOnStartEnabled(targetState)
+                            pendingCheckOnStart = null
+                        },
+                        visualTokens = theme.colors.interactiveComponents.confirmButton,
+                        fontSize = 14.sp,
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        isKeyboardKey = false
+                    )
+                    NepoButton(
+                        text = stringResource(id = R.string.settings_dialog_btn_close),
+                        onClick = { pendingCheckOnStart = null },
+                        visualTokens = theme.colors.interactiveComponents.closeButton,
+                        fontSize = 14.sp,
+                        padding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        isKeyboardKey = false
+                    )
+                }
+            }
+        )
     }
 
     if (showInternetConfirmDialog) {
@@ -1478,6 +1530,7 @@ private fun CreditsMenuItem(
 sealed interface UpdateResult {
     data object UpToDate : UpdateResult
     data class NewVersion(val version: String, val downloadUrl: String, val changelog: String?) : UpdateResult
+    data class FutureVersion(val version: String, val latestVersion: String) : UpdateResult
     data object Error : UpdateResult
 }
 
@@ -1511,6 +1564,24 @@ private fun isNewerVersion(current: String, latest: String): Boolean {
     return false
 }
 
+private fun isFutureVersion(current: String, latest: String): Boolean {
+    val cleanCurrent = current.removePrefix("v").removePrefix("V").trim()
+    val cleanLatest = latest.removePrefix("v").removePrefix("V").trim()
+    if (cleanCurrent == cleanLatest) return false
+    
+    val currentParts = cleanCurrent.split(".").mapNotNull { it.toIntOrNull() }
+    val latestParts = cleanLatest.split(".").mapNotNull { it.toIntOrNull() }
+    
+    val length = maxOf(currentParts.size, latestParts.size)
+    for (i in 0 until length) {
+        val currVal = currentParts.getOrElse(i) { 0 }
+        val latVal = latestParts.getOrElse(i) { 0 }
+        if (currVal > latVal) return true
+        if (currVal < latVal) return false
+    }
+    return false
+}
+
 suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
     var connection: java.net.HttpURLConnection? = null
     try {
@@ -1529,9 +1600,9 @@ suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = 
             val release = gson.fromJson(responseText, GitHubRelease::class.java)
             
             val currentVersion = try {
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.2.1"
             } catch (e: Exception) {
-                "1.0.0"
+                "1.2.1"
             }
             
             if (isNewerVersion(currentVersion, release.tag_name)) {
@@ -1540,6 +1611,11 @@ suspend fun checkGitHubUpdate(context: android.content.Context): UpdateResult = 
                     version = release.tag_name,
                     downloadUrl = apkUrl,
                     changelog = release.body
+                )
+            } else if (isFutureVersion(currentVersion, release.tag_name)) {
+                UpdateResult.FutureVersion(
+                    version = currentVersion,
+                    latestVersion = release.tag_name
                 )
             } else {
                 UpdateResult.UpToDate
@@ -1577,9 +1653,9 @@ fun NepoUpdateDialog(
     
     val currentVersion = remember(context) {
         try {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.0.0"
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "1.2.1"
         } catch (e: Exception) {
-            "1.0.0"
+            "1.2.1"
         }
     }
     
@@ -1637,6 +1713,30 @@ fun NepoUpdateDialog(
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = stringResource(id = R.string.settings_dialog_up_to_date, currentVersion),
+                                color = theme.colors.typography.bodyPrimary,
+                                fontSize = 14.sp,
+                                fontFamily = fontFamily,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        is UpdateResult.FutureVersion -> {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(theme.colors.typography.headerAccent),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.material3.Icon(
+                                    imageVector = Lucide.Sparkles,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.settings_dialog_future_version, result.version, result.latestVersion),
                                 color = theme.colors.typography.bodyPrimary,
                                 fontSize = 14.sp,
                                 fontFamily = fontFamily,
@@ -1762,7 +1862,7 @@ fun NepoUpdateDialog(
                                 isKeyboardKey = false
                             )
                         }
-                        is UpdateResult.UpToDate -> {
+                        is UpdateResult.UpToDate, is UpdateResult.FutureVersion -> {
                             NepoButton(
                                 text = stringResource(id = R.string.settings_dialog_btn_ok),
                                 onClick = onDismissRequest,

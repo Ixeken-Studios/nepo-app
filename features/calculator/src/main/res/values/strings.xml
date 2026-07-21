@@ -37,7 +37,7 @@
     <!-- About Screen & Updates -->
     <string name="settings_section_about">About</string>
     <string name="app_name_about">Nepo</string>
-    <string name="app_version_about">v1.2.0</string>
+    <string name="app_version_about">v1.2.1</string>
     <string name="settings_section_info_updates">Information &amp; Updates</string>
     <string name="settings_option_view_changelog">View changelog</string>
     <string name="settings_option_check_updates">Check for updates</string>
@@ -56,6 +56,7 @@
     <string name="settings_dialog_checking_updates">Checking for updates…</string>
     <string name="settings_dialog_up_to_date">Nepo is up to date (%1$s)</string>
     <string name="settings_dialog_update_available">New version %1$s is available!</string>
+    <string name="settings_dialog_future_version">Did you bring a time machine? ⏳ You are using version %1$s, which is ahead of the latest official GitHub release (%2$s)!</string>
     <string name="settings_dialog_update_error">Could not connect to GitHub. Repository may be private or network is offline.</string>
     <string name="settings_dialog_btn_ok">OK</string>
     <string name="settings_dialog_btn_download">Download</string>
@@ -66,7 +67,7 @@
     
     <string name="settings_sheet_changelog">Changelog</string>
     <string name="settings_sheet_version_history">Version history</string>
-    <string name="settings_sheet_version_latest">Version 1.2.0 (Latest)</string>
+    <string name="settings_sheet_version_latest">Version 1.2.1 (Latest)</string>
     
     <string name="changelog_point_1">• Added new beautiful themes to customize the application\'s appearance.</string>
     <string name="changelog_point_2">• Added a separator for the default fonts in the font section.</string>

@@ -38,14 +38,18 @@ fun CalculatorKeyboard(
     onToggleDegreeMode: () -> Unit,
     onToggleInversedMode: () -> Unit,
     modifier: Modifier = Modifier,
+    isCompactHeight: Boolean = false,
+    isUltraCompact: Boolean = false,
     hazeState: HazeState? = null
 ) {
     val theme = LocalNepoTheme.current
     val tokens = theme.colors.interactiveComponents
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val spaceBetween = if (isLandscape) 4.dp else 8.dp
-    val buttonModifier = if (isLandscape) Modifier.fillMaxHeight() else {
+    val isAdaptiveHeight = isLandscape || isCompactHeight
+    val spaceBetween = if (isUltraCompact) 2.dp else if (isAdaptiveHeight) 4.dp else 8.dp
+    val buttonPadding = if (isUltraCompact) PaddingValues(horizontal = 2.dp, vertical = 1.dp) else if (isCompactHeight) PaddingValues(horizontal = 4.dp, vertical = 2.dp) else PaddingValues(12.dp)
+    val buttonModifier = if (isAdaptiveHeight) Modifier.fillMaxHeight() else {
         if (mode == "SCIENTIFIC" || mode == "CONVERTER") Modifier.aspectRatio(1.22f)
         else Modifier.aspectRatio(1f)
     }
@@ -54,19 +58,19 @@ fun CalculatorKeyboard(
     val customTypography = currentTypography.copy(
         titleLarge = currentTypography.titleLarge.copy(
             fontWeight = FontWeight.Bold,
-            fontSize = if (isLandscape && mode == "SCIENTIFIC") 18.sp else currentTypography.titleLarge.fontSize
+            fontSize = if (isLandscape && mode == "SCIENTIFIC") 18.sp else if (isUltraCompact) 16.sp else if (isCompactHeight) 18.sp else currentTypography.titleLarge.fontSize
         )
     )
  
     MaterialTheme(typography = customTypography) {
         Column(
             modifier = modifier
-                .then(if (isLandscape) Modifier.fillMaxHeight() else Modifier.fillMaxWidth())
-                .padding(if (isLandscape) 4.dp else 8.dp),
+                .then(if (isAdaptiveHeight) Modifier.fillMaxHeight() else Modifier.fillMaxWidth())
+                .padding(if (isUltraCompact) 2.dp else if (isAdaptiveHeight) 4.dp else 8.dp),
             verticalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
-        // Row 0: Scientific operators as plain text floating labels (Only in Portrait mode)
-        if (!isLandscape && mode == "SCIENTIFIC") {
+        // Row 0: Scientific operators as plain text floating labels (Only in Portrait mode when not ultra compact)
+        if (!isLandscape && !isUltraCompact && mode == "SCIENTIFIC") {
             // Row 0.1: INV, RAD/DEG, (, ), π
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -76,27 +80,32 @@ fun CalculatorKeyboard(
                     text = "INV",
                     onClick = { onToggleInversedMode() },
                     textColor = if (isInversedMode) theme.colors.typography.headerAccent else theme.colors.typography.bodyPrimary,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = if (isDegreeMode) "DEG" else "RAD",
                     onClick = { onToggleDegreeMode() },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "(",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = ")",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress(")")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "π",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("π")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
             }
             
@@ -109,29 +118,34 @@ fun CalculatorKeyboard(
                 ScientificTextButton(
                     text = sinText,
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("$sinText(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 val cosText = if (isInversedMode) "acos" else "cos"
                 ScientificTextButton(
                     text = cosText,
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("$cosText(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 val tanText = if (isInversedMode) "atan" else "tan"
                 ScientificTextButton(
                     text = tanText,
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("$tanText(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "^",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("^")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "√",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("√(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
             }
             
@@ -145,34 +159,39 @@ fun CalculatorKeyboard(
                 ScientificTextButton(
                     text = lnText,
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress(lnPress)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 val logText = if (isInversedMode) "10ˣ" else "log"
                 val logPress = if (isInversedMode) "10^(" else "log("
                 ScientificTextButton(
                     text = logText,
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress(logPress)) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "e",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("e")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "³√",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("cbrt(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "|x|",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("abs(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
             }
         }
 
-        if (!isLandscape && mode == "BASIC") {
+        if (!isLandscape && !isUltraCompact && mode == "BASIC") {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(spaceBetween)
@@ -180,29 +199,33 @@ fun CalculatorKeyboard(
                 ScientificTextButton(
                     text = "²√",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("²√(")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "π",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("π")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "^",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("^")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
                 ScientificTextButton(
                     text = "()",
                     onClick = { onEvent(CalculatorUserEvent.OnKeyPress("()")) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isCompactHeight = isCompactHeight
                 )
             }
         }
 
         // Row 1: Scientific (if landscape) + Backspace (Icon), AC, %, ÷
         Row(
-            modifier = if (isLandscape) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            modifier = if (isAdaptiveHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
             if (isLandscape) {
@@ -237,6 +260,7 @@ fun CalculatorKeyboard(
                 visualTokens = tokens.deleteButton,
                 icon = Lucide.Delete,
                 iconBold = true,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -244,6 +268,7 @@ fun CalculatorKeyboard(
                 text = "AC",
                 onClick = { onEvent(CalculatorUserEvent.OnClearAll) },
                 visualTokens = tokens.deleteButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -251,6 +276,7 @@ fun CalculatorKeyboard(
                 text = "%",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("%")) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -258,6 +284,7 @@ fun CalculatorKeyboard(
                 text = "/",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("/")) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -265,7 +292,7 @@ fun CalculatorKeyboard(
 
         // Row 2: Scientific (if landscape) + 7, 8, 9, ×
         Row(
-            modifier = if (isLandscape) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            modifier = if (isAdaptiveHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
             if (isLandscape) {
@@ -300,6 +327,7 @@ fun CalculatorKeyboard(
                 text = "7",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("7")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -307,6 +335,7 @@ fun CalculatorKeyboard(
                 text = "8",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("8")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -314,6 +343,7 @@ fun CalculatorKeyboard(
                 text = "9",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("9")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -321,6 +351,7 @@ fun CalculatorKeyboard(
                 text = "×",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("×")) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -328,7 +359,7 @@ fun CalculatorKeyboard(
 
         // Row 3: Scientific (if landscape, empty spacer) + 4, 5, 6, -
         Row(
-            modifier = if (isLandscape) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            modifier = if (isAdaptiveHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
             if (isLandscape) {
@@ -363,6 +394,7 @@ fun CalculatorKeyboard(
                 text = "4",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("4")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -370,6 +402,7 @@ fun CalculatorKeyboard(
                 text = "5",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("5")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -377,6 +410,7 @@ fun CalculatorKeyboard(
                 text = "6",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("6")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -384,6 +418,7 @@ fun CalculatorKeyboard(
                 text = "-",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("-")) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -391,7 +426,7 @@ fun CalculatorKeyboard(
 
         // Row 4: Scientific (if landscape) + 1, 2, 3, +
         Row(
-            modifier = if (isLandscape) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            modifier = if (isAdaptiveHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
             if (isLandscape) {
@@ -423,6 +458,7 @@ fun CalculatorKeyboard(
                 text = "1",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("1")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -430,6 +466,7 @@ fun CalculatorKeyboard(
                 text = "2",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("2")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -437,6 +474,7 @@ fun CalculatorKeyboard(
                 text = "3",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("3")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -444,6 +482,7 @@ fun CalculatorKeyboard(
                 text = "+",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("+")) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -451,7 +490,7 @@ fun CalculatorKeyboard(
 
         // Row 5: Scientific (if landscape) + ±, 0, ., =
         Row(
-            modifier = if (isLandscape) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            modifier = if (isAdaptiveHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spaceBetween)
         ) {
             if (isLandscape) {
@@ -481,6 +520,7 @@ fun CalculatorKeyboard(
                 text = "±",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("±")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -488,6 +528,7 @@ fun CalculatorKeyboard(
                 text = "Ø",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress("0")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -495,6 +536,7 @@ fun CalculatorKeyboard(
                 text = ".",
                 onClick = { onEvent(CalculatorUserEvent.OnKeyPress(".")) },
                 visualTokens = tokens.numbersButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -502,6 +544,7 @@ fun CalculatorKeyboard(
                 text = "=",
                 onClick = { onEvent(CalculatorUserEvent.OnEvaluate) },
                 visualTokens = tokens.operatorButton,
+                padding = buttonPadding,
                 modifier = Modifier.weight(1f).then(buttonModifier),
                 hazeState = hazeState
             )
@@ -515,12 +558,13 @@ private fun ScientificTextButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textColor: androidx.compose.ui.graphics.Color? = null
+    textColor: androidx.compose.ui.graphics.Color? = null,
+    isCompactHeight: Boolean = false
 ) {
     val theme = LocalNepoTheme.current
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val height = if (isLandscape) 30.dp else 36.dp
+    val height = if (isLandscape) 30.dp else if (isCompactHeight) 24.dp else 36.dp
     val resolvedColor = textColor ?: theme.colors.typography.scientificOperators
 
     val context = androidx.compose.ui.platform.LocalContext.current
